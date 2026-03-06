@@ -95,6 +95,9 @@ require_admin_login();
                     <p class="text-muted small mb-0">Flexion web sitesindeki tüm içerikleri buradan yönet.</p>
                 </div>
                 <div class="d-flex align-items-center gap-3">
+                    <a href="../index.php" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Siteyi Görüntüle
+                    </a>
                     <span class="small text-muted">
                         <i class="bi bi-person-circle me-1"></i>
                         <?= e($_SESSION['admin_username'] ?? 'admin') ?>

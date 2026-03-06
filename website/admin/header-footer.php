@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/upload_helper.php';
 
 require_admin_login();
 
@@ -41,23 +42,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             hf_save_setting($pdo, $field, $val);
         }
 
-        // Logo yükleme
+        // Logo yükleme (upload_helper ile güvenli)
         if (!empty($_FILES['logo']['name'])) {
-            $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
-            $mime    = mime_content_type($_FILES['logo']['tmp_name']);
-            if (!in_array($mime, $allowed, true)) {
-                $error = 'Logo için sadece JPG, PNG, WEBP veya SVG desteklenmektedir.';
-            } elseif ($_FILES['logo']['size'] > 2 * 1024 * 1024) {
-                $error = 'Logo dosyası 2 MB\'tan büyük olamaz.';
+            $file = $_FILES['logo'];
+
+            $savedName = upload_file(
+                $file,
+                __DIR__ . '/../assets/uploads/',
+                ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'],
+                2 * 1024 * 1024
+            );
+
+            if ($savedName) {
+                hf_save_setting($pdo, 'logo_path', 'assets/uploads/' . $savedName);
             } else {
-                $ext  = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
-                $name = 'logo_' . time() . '.' . $ext;
-                $dest = __DIR__ . '/../assets/uploads/' . $name;
-                if (move_uploaded_file($_FILES['logo']['tmp_name'], $dest)) {
-                    hf_save_setting($pdo, 'logo_path', 'assets/uploads/' . $name);
-                } else {
-                    $error = 'Logo yüklenirken bir hata oluştu.';
-                }
+                $error = 'Logo yüklenemedi. JPG/PNG/WEBP/SVG ve en fazla 2 MB olmalı.';
             }
         }
 

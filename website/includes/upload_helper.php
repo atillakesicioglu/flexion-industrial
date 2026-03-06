@@ -23,7 +23,12 @@ function upload_file(
         return null;
     }
 
-    $mime = mime_content_type($file['tmp_name']);
+    // MIME tipini tespit et (fileinfo yoksa geriye dönük uyum)
+    if (function_exists('mime_content_type') && is_file($file['tmp_name'])) {
+        $mime = mime_content_type($file['tmp_name']);
+    } else {
+        $mime = $file['type'] ?? 'application/octet-stream';
+    }
     if (!in_array($mime, $allowedMime, true)) {
         return null;
     }

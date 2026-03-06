@@ -59,18 +59,19 @@ if (empty($sections)) {
         <?php
         $isCover   = ($imageMode === 'cover' && $imgSrc);
         $sectionCl = $isCover ? 'fx-hero fx-hero-cover' : 'fx-hero';
-        $style     = '';
-        if ($isCover) {
-            $style = "background-image:url('".htmlspecialchars($imgSrc, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')."');";
-        }
         ?>
-        <section class="<?= $sectionCl ?>" style="<?= $style ?>">
+        <section class="<?= $sectionCl ?>">
             <?php if ($isCover): ?>
                 <?php
-                $opacityCss = $imageOpacity / 100;
-                $blurCss    = $imageBlur > 0 ? 'blur(' . $imageBlur . 'px)' : 'none';
+                $bgImgEsc    = htmlspecialchars($imgSrc, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                $bgStyle     = "background-image:url('{$bgImgEsc}');";
+                if ($imageBlur > 0) {
+                    $bgStyle .= "filter:blur({$imageBlur}px);";
+                }
+                $overlayAlpha = round(max(0, min(0.85, 1 - $imageOpacity / 100)), 2);
                 ?>
-                <div class="fx-hero-overlay" style="background:rgba(0,0,0,0.45);backdrop-filter:<?= $blurCss ?>;opacity:<?= $opacityCss ?>;"></div>
+                <div class="fx-hero-bg" style="<?= $bgStyle ?>"></div>
+                <div class="fx-hero-overlay" style="background:rgba(0,0,0,<?= $overlayAlpha ?>);"></div>
             <?php endif; ?>
             <div class="container position-relative">
                 <div class="row align-items-center">

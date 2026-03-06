@@ -2,59 +2,124 @@
 
 require_once __DIR__ . '/functions.php';
 
-$companyName  = get_setting('company_name', 'Flexion Industrial');
-$address      = get_setting('company_address', 'Adres bilgisi');
-$email        = get_setting('contact_email', 'info@example.com');
-$phone        = get_setting('contact_phone', '+90 ... ... .. ..');
-$footerText   = get_setting('footer_text', 'All rights reserved.');
-$linkedin     = get_setting('social_linkedin', '');
-$youtube      = get_setting('social_youtube', '');
+$companyName = get_setting('company_name', 'Flexion Industrial');
+$address     = get_setting('company_address', 'Adres bilgisi');
+$email       = get_setting('contact_email', 'info@example.com');
+$phone       = get_setting('contact_phone', '+90 ... ... .. ..');
+$footerText  = get_setting('footer_text', 'All rights reserved.');
+$linkedin    = get_setting('social_linkedin', '');
+$youtube     = get_setting('social_youtube', '');
+$logoPath    = get_setting('logo_path', '');
+$siteTitle   = get_setting('site_title', 'Flexion Industrial');
+$logoHeight  = max(20, min(120, (int) get_setting('logo_height', '36')));
+
+// Footer linkleri - column_key'e göre grupla
+$footerLinksRaw = [];
+try {
+    $pdo = db();
+    $stmt = $pdo->query('SELECT * FROM footer_links WHERE is_active = 1 ORDER BY column_key ASC, sort_order ASC, id ASC');
+    $footerLinksRaw = $stmt->fetchAll();
+} catch (Exception $e) {
+    // footer_links tablosu henüz yoksa sessizce geç
+}
+
+$footerCols = [];
+foreach ($footerLinksRaw as $fl) {
+    $key = $fl['column_key'];
+    if (!isset($footerCols[$key])) {
+        $footerCols[$key] = ['label' => $fl['column_label'] ?: $key, 'links' => []];
+    }
+    $footerCols[$key]['links'][] = $fl;
+}
 ?>
 </main>
 
 <footer class="fx-footer text-light mt-5">
     <div class="container">
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <h5 class="text-white mb-3"><?= e($companyName) ?></h5>
-                <p class="mb-1 small"><?= e($address) ?></p>
-                <p class="mb-1 small">
-                    <i class="bi bi-telephone me-1"></i><?= e($phone) ?>
-                </p>
-                <p class="mb-1 small">
-                    <i class="bi bi-envelope me-1"></i><?= e($email) ?>
-                </p>
+        <div class="row g-4 py-4">
+            <!-- Şirket bilgisi -->
+            <div class="col-md-4 col-lg-3">
+                <?php if ($logoPath): ?>
+                    <a href="index.php" class="d-inline-block mb-3">
+                        <img src="<?= e($logoPath) ?>" alt="<?= e($siteTitle) ?>"
+                             height="<?= $logoHeight ?>" style="max-height:<?= $logoHeight ?>px;filter:brightness(0) invert(1);">
+                    </a>
+                <?php else: ?>
+                    <div class="fw-bold text-white fs-5 mb-3"><?= e($companyName) ?></div>
+                <?php endif; ?>
+                <p class="small mb-1"><?= e($address) ?></p>
+                <?php if ($phone): ?>
+                    <p class="small mb-1">
+                        <i class="bi bi-telephone me-1"></i>
+                        <a href="tel:<?= e(preg_replace('/\s+/', '', $phone)) ?>" class="text-reset"><?= e($phone) ?></a>
+                    </p>
+                <?php endif; ?>
+                <?php if ($email): ?>
+                    <p class="small mb-0">
+                        <i class="bi bi-envelope me-1"></i>
+                        <a href="mailto:<?= e($email) ?>" class="text-reset"><?= e($email) ?></a>
+                    </p>
+                <?php endif; ?>
             </div>
-            <div class="col-md-4 mb-3">
-                <h6 class="text-white mb-3">Kataloglar & Belgeler</h6>
-                <ul class="list-unstyled small">
-                    <!-- İleride useful_documents tablosundan doldurulacak -->
-                    <li><a href="#">Genel kataloğu indir</a></li>
-                    <li><a href="#">Teknik dokümanlar</a></li>
-                </ul>
-            </div>
-            <div class="col-md-4 mb-3">
-                <h6 class="text-white mb-3">Bizi Takip Edin</h6>
-                <div class="d-flex gap-3 mb-3">
-                    <?php if ($linkedin): ?>
-                        <a href="<?= e($linkedin) ?>" target="_blank" rel="noopener">
-                            <i class="bi bi-linkedin fs-4"></i>
-                        </a>
-                    <?php endif; ?>
-                    <?php if ($youtube): ?>
-                        <a href="<?= e($youtube) ?>" target="_blank" rel="noopener">
-                            <i class="bi bi-youtube fs-4"></i>
-                        </a>
-                    <?php endif; ?>
+
+            <!-- Dinamik link sütunları -->
+            <?php if (!empty($footerCols)): ?>
+                <?php foreach ($footerCols as $colData): ?>
+                    <div class="col-6 col-md-2 col-lg-2">
+                        <h6 class="text-white mb-3 fw-semibold"><?= e($colData['label']) ?></h6>
+                        <ul class="list-unstyled small">
+                            <?php foreach ($colData['links'] as $fl): ?>
+                                <li class="mb-1">
+                                    <a href="<?= e($fl['url']) ?>"><?= e($fl['title']) ?></a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <!-- Varsayılan statik sütunlar (footer_links tablosu boşken) -->
+                <div class="col-6 col-md-2 col-lg-2">
+                    <h6 class="text-white mb-3 fw-semibold">Kurumsal</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-1"><a href="page.php?slug=hakkimizda">Hakkımızda</a></li>
+                        <li class="mb-1"><a href="page.php?slug=iletisim">İletişim</a></li>
+                    </ul>
                 </div>
+                <div class="col-6 col-md-2 col-lg-2">
+                    <h6 class="text-white mb-3 fw-semibold">Ürünler</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-1"><a href="sectors.php">Tüm Ürünler</a></li>
+                        <li class="mb-1"><a href="news.php">Haberler</a></li>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <!-- Sosyal medya / İletişim -->
+            <div class="col-md-3 col-lg-3 ms-lg-auto">
+                <?php if ($linkedin || $youtube): ?>
+                    <h6 class="text-white mb-3 fw-semibold">Sosyal Medya</h6>
+                    <div class="d-flex gap-3 mb-3">
+                        <?php if ($linkedin): ?>
+                            <a href="<?= e($linkedin) ?>" target="_blank" rel="noopener" title="LinkedIn">
+                                <i class="bi bi-linkedin fs-4"></i>
+                            </a>
+                        <?php endif; ?>
+                        <?php if ($youtube): ?>
+                            <a href="<?= e($youtube) ?>" target="_blank" rel="noopener" title="YouTube">
+                                <i class="bi bi-youtube fs-4"></i>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
                 <p class="small mb-0">
                     <?= e(get_setting('newsletter_text', 'Yeni ürün ve projelerden haberdar olmak için bültenimize abone olun.')) ?>
                 </p>
             </div>
         </div>
-        <div class="fx-footer-bottom d-flex justify-content-between align-items-center">
+
+        <div class="fx-footer-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
             <span class="small"><?= e($footerText) ?></span>
-            <span class="small text-muted">Designed for Flexion</span>
+            <span class="small text-muted">Powered by Flexion</span>
         </div>
     </div>
 </footer>
@@ -62,4 +127,3 @@ $youtube      = get_setting('social_youtube', '');
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

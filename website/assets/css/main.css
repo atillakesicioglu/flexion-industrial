@@ -38,13 +38,27 @@ body {
 
 .fx-hero-cover {
     position: relative;
+    overflow: hidden;
+    background: #111827;
+}
+
+.fx-hero-cover .fx-hero-bg {
+    position: absolute;
+    inset: -30px;
     background-size: cover;
     background-position: center;
+    z-index: 0;
 }
 
 .fx-hero-cover .fx-hero-overlay {
     position: absolute;
     inset: 0;
+    z-index: 1;
+}
+
+.fx-hero-cover .container {
+    position: relative;
+    z-index: 2;
 }
 
 .fx-hero .btn-primary {

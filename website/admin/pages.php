@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/upload_helper.php';
 
 require_admin_login();
 
@@ -191,7 +192,7 @@ include __DIR__ . '/partials_header.php';
                 <strong><?= $editPage ? 'Sayfayı Düzenle' : 'Yeni Sayfa Ekle' ?></strong>
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="<?= e($token) ?>">
                     <input type="hidden" name="save_page" value="1">
                     <?php if ($editPage): ?>

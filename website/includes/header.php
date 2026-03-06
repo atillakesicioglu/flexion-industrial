@@ -5,6 +5,7 @@ require_once __DIR__ . '/functions.php';
 $siteTitle   = get_setting('site_title', 'Flexion Industrial');
 $topbarText  = get_setting('topbar_text', 'Industrial rubber and cable solutions');
 $logoPath    = get_setting('logo_path', '');
+$logoHeight  = max(20, min(120, (int) get_setting('logo_height', '36')));
 $menu        = get_main_menu();
 ?>
 <!DOCTYPE html>
@@ -32,7 +33,7 @@ $menu        = get_main_menu();
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="index.php">
                 <?php if ($logoPath): ?>
-                    <img src="<?= e($logoPath) ?>" alt="<?= e($siteTitle) ?>" height="36" class="me-2">
+                    <img src="<?= e($logoPath) ?>" alt="<?= e($siteTitle) ?>" height="<?= $logoHeight ?>" class="me-2">
                 <?php endif; ?>
                 <span class="fx-header-logo">FLEXION</span>
             </a>

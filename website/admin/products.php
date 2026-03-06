@@ -59,9 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($id > 0) {
                     $imgSql = $mainImage ? ', main_image = :img' : '';
-                    $stmt   = $pdo->prepare("UPDATE products SET category_id = :cat, name = :name, slug = :slug,
-                                code = :code, short_description = :sdesc, description = :desc,
-                                is_active = :active $imgSql WHERE id = :id");
                     $params = [
                         ':cat'    => $catId,
                         ':name'   => $name,
@@ -77,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     $pdo->prepare("UPDATE products SET category_id = :cat, name = :name, slug = :slug,
                                 code = :code, short_description = :sdesc, description = :desc,
-                                is_active = :active" . ($mainImage ? ', main_image = :img' : '') . " WHERE id = :id")
+                                is_active = :active{$imgSql} WHERE id = :id")
                         ->execute($params);
                     $success = 'Ürün güncellendi.';
                 } else {
@@ -101,8 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Ek görseller
                 if (!empty($_FILES['extra_images']['name'][0])) {
-                    $sortImg = (int) $pdo->prepare('SELECT IFNULL(MAX(sort_order),0)+1 FROM product_images WHERE product_id = ?')
-                                         ->execute([$id]) ? 1 : 1;
+                    $stmtSortImg = $pdo->prepare('SELECT IFNULL(MAX(sort_order),0)+1 FROM product_images WHERE product_id = ?');
+                    $stmtSortImg->execute([$id]);
+                    $sortImg = (int) $stmtSortImg->fetchColumn();
                     foreach ($_FILES['extra_images']['name'] as $k => $fname2) {
                         $single = [
                             'name'     => $fname2,
@@ -141,12 +139,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // ---- Spec tablosu ekle ----
-        elseif (isset($_POST['add_spec_table'])) {
+        else        if (isset($_POST['add_spec_table'])) {
             $pid   = (int) ($_POST['product_id'] ?? 0);
             $title = trim($_POST['spec_table_title'] ?? '');
             if ($pid > 0) {
-                $sort = (int) $pdo->prepare('SELECT IFNULL(MAX(sort_order),0)+1 FROM product_spec_tables WHERE product_id = ?')
-                                   ->execute([$pid]) ? 1 : 1;
+                $stmtSort = $pdo->prepare('SELECT IFNULL(MAX(sort_order),0)+1 FROM product_spec_tables WHERE product_id = ?');
+                $stmtSort->execute([$pid]);
+                $sort = (int) $stmtSort->fetchColumn();
                 $pdo->prepare('INSERT INTO product_spec_tables (product_id, title, sort_order) VALUES (?, ?, ?)')
                     ->execute([$pid, $title ?: null, $sort]);
                 $success = 'Tablo eklendi.';
@@ -159,8 +158,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $label = trim($_POST['spec_label'] ?? '');
             $value = trim($_POST['spec_value'] ?? '');
             if ($tid > 0 && $label !== '' && $value !== '') {
-                $sort = (int) $pdo->prepare('SELECT IFNULL(MAX(sort_order),0)+1 FROM product_specs WHERE table_id = ?')
-                                   ->execute([$tid]) ? 1 : 1;
+                $stmtSort = $pdo->prepare('SELECT IFNULL(MAX(sort_order),0)+1 FROM product_specs WHERE table_id = ?');
+                $stmtSort->execute([$tid]);
+                $sort = (int) $stmtSort->fetchColumn();
                 $pdo->prepare('INSERT INTO product_specs (table_id, label, value, sort_order) VALUES (?, ?, ?, ?)')
                     ->execute([$tid, $label, $value, $sort]);
                 $success = 'Satır eklendi.';
@@ -209,8 +209,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $icon = $uploadBase . $fn;
                     }
                 }
-                $sort = (int) $pdo->prepare('SELECT IFNULL(MAX(sort_order),0)+1 FROM product_regulations WHERE product_id = ?')
-                                   ->execute([$pid]) ? 1 : 1;
+                $stmtSort = $pdo->prepare('SELECT IFNULL(MAX(sort_order),0)+1 FROM product_regulations WHERE product_id = ?');
+                $stmtSort->execute([$pid]);
+                $sort = (int) $stmtSort->fetchColumn();
                 $pdo->prepare('INSERT INTO product_regulations (product_id, title, icon, sort_order) VALUES (?, ?, ?, ?)')
                     ->execute([$pid, $title, $icon, $sort]);
                 $success = 'Regülasyon eklendi.';
@@ -305,7 +306,6 @@ $editId = isset($_GET['edit']) ? (int) $_GET['edit'] : 0;
 $categories = $pdo->query('SELECT id, name FROM categories WHERE is_active = 1 ORDER BY sort_order ASC, name ASC')->fetchAll();
 
 if ($editId) {
-    $editProduct = $pdo->prepare('SELECT * FROM products WHERE id = ?')->execute([$editId]) ? null : null;
     $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
     $stmt->execute([$editId]);
     $editProduct = $stmt->fetch() ?: null;

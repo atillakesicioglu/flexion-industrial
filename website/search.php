@@ -11,12 +11,12 @@ $resultsCats     = [];
 if ($q !== '') {
     $like = '%' . $q . '%';
 
-    $stmt = $pdo->prepare('SELECT * FROM products WHERE is_active = 1 AND (name LIKE :q OR code LIKE :q OR short_description LIKE :q) ORDER BY name ASC LIMIT 50');
-    $stmt->execute([':q' => $like]);
+    $stmt = $pdo->prepare('SELECT * FROM products WHERE is_active = 1 AND (name LIKE :q1 OR code LIKE :q2 OR short_description LIKE :q3) ORDER BY name ASC LIMIT 50');
+    $stmt->execute([':q1' => $like, ':q2' => $like, ':q3' => $like]);
     $resultsProducts = $stmt->fetchAll();
 
-    $stmt2 = $pdo->prepare('SELECT * FROM categories WHERE is_active = 1 AND (name LIKE :q OR short_description LIKE :q) ORDER BY name ASC LIMIT 20');
-    $stmt2->execute([':q' => $like]);
+    $stmt2 = $pdo->prepare('SELECT * FROM categories WHERE is_active = 1 AND (name LIKE :q1 OR short_description LIKE :q2) ORDER BY name ASC LIMIT 20');
+    $stmt2->execute([':q1' => $like, ':q2' => $like]);
     $resultsCats = $stmt2->fetchAll();
 }
 ?>
@@ -51,7 +51,7 @@ if ($q !== '') {
                 <div class="row g-3 mb-4">
                     <?php foreach ($resultsCats as $cat): ?>
                         <div class="col-md-4">
-                            <a href="category.php?id<?= e((string) $cat['id']) ?>" class="card h-100 text-decoration-none text-dark border-0 shadow-sm">
+                            <a href="category.php?id=<?= e((string) $cat['id']) ?>" class="card h-100 text-decoration-none text-dark border-0 shadow-sm">
                                 <?php if (!empty($cat['image'])): ?>
                                     <img src="<?= e($cat['image']) ?>" class="card-img-top" alt="<?= e($cat['name']) ?>">
                                 <?php endif; ?>

@@ -232,6 +232,8 @@ CREATE TABLE `pages` (
   `title` VARCHAR(255) NOT NULL,
   `content` LONGTEXT NULL,
   `meta_description` VARCHAR(300) NULL,
+  `banner_image` VARCHAR(255) NULL,
+  `banner_title` VARCHAR(255) NULL,
   `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   `sort_order` INT NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -261,6 +263,26 @@ CREATE TABLE `product_documents` (
   KEY `idx_product_documents_product` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Footer linkleri
+CREATE TABLE `footer_links` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `column_key` VARCHAR(50) NOT NULL COMMENT 'company | products | contact',
+  `column_label` VARCHAR(100) NOT NULL DEFAULT '',
+  `title` VARCHAR(255) NOT NULL,
+  `url` VARCHAR(500) NOT NULL,
+  `sort_order` INT NOT NULL DEFAULT 0,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `idx_column_key` (`column_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `footer_links` (`column_key`, `column_label`, `title`, `url`, `sort_order`, `is_active`) VALUES
+('company',  'Kurumsal',  'Hakkımızda',      'page.php?slug=hakkimizda', 1, 1),
+('company',  'Kurumsal',  'İletişim',        'page.php?slug=iletisim',   2, 1),
+('products', 'Ürünler',   'Tüm Ürünler',     'sectors.php',              1, 1),
+('products', 'Ürünler',   'Haberler',        'news.php',                 2, 1),
+('contact',  'İletişim',  'Bize Ulaşın',     'page.php?slug=iletisim',   1, 1);
+
 -- Örnek haber
 INSERT INTO `news` (`title`, `slug`, `summary`, `published_at`, `is_active`) VALUES
 ('Flexion IEC 60502-2 Sertifikasını Aldı', 'flexion-iec-60502-2-sertifikasi',
@@ -269,4 +291,49 @@ INSERT INTO `news` (`title`, `slug`, `summary`, `published_at`, `is_active`) VAL
 ('Yeni FLX-FR Yangına Dayanıklı Kablo Serisi', 'yeni-flx-fr-yangina-dayanikli',
  'BS 6387 CWZ sertifikalı yeni yangına dayanıklı kablo serimiz artık sipariş alınmaya başlandı.',
  '2025-01-15', 1);
+
+-- ============================================================
+-- MİGRASYON: Mevcut kurulumlar için ek SQL komutları
+-- (Yeni kurulumda bu bölümü çalıştırmanıza gerek yoktur)
+-- PHPMyAdmin > SQL sekmesine kopyalayıp çalıştırın
+-- ============================================================
+
+-- 1) pages tablosuna banner alanları ekle
+ALTER TABLE `pages`
+  ADD COLUMN IF NOT EXISTS `banner_image` VARCHAR(255) NULL AFTER `meta_description`,
+  ADD COLUMN IF NOT EXISTS `banner_title` VARCHAR(255) NULL AFTER `banner_image`;
+
+-- 2) Logo yüksekliği ayarı
+INSERT IGNORE INTO `settings` (`setting_key`, `setting_value`) VALUES ('logo_height', '36');
+
+-- 3) product_documents tablosu (yoksa oluştur)
+CREATE TABLE IF NOT EXISTS `product_documents` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `product_id` INT UNSIGNED NOT NULL,
+  `title` VARCHAR(255) NOT NULL,
+  `file_path` VARCHAR(500) NOT NULL,
+  `sort_order` INT NOT NULL DEFAULT 0,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_product_documents_product` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4) footer_links tablosu (yoksa oluştur)
+CREATE TABLE IF NOT EXISTS `footer_links` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `column_key` VARCHAR(50) NOT NULL,
+  `column_label` VARCHAR(100) NOT NULL DEFAULT '',
+  `title` VARCHAR(255) NOT NULL,
+  `url` VARCHAR(500) NOT NULL,
+  `sort_order` INT NOT NULL DEFAULT 0,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `idx_column_key` (`column_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5) news_banner ayarları (yoksa ekle)
+INSERT IGNORE INTO `settings` (`setting_key`, `setting_value`) VALUES
+  ('news_banner_image', ''),
+  ('news_banner_title', 'Haberler & Insights');
 

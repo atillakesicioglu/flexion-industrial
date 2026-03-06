@@ -185,7 +185,10 @@ $columnMigrations = [
     ['table' => 'pages',    'column' => 'banner_image',       'sql' => 'ALTER TABLE `pages` ADD COLUMN `banner_image` VARCHAR(255) NULL AFTER `meta_description`'],
     ['table' => 'pages',    'column' => 'banner_title',       'sql' => 'ALTER TABLE `pages` ADD COLUMN `banner_title` VARCHAR(255) NULL AFTER `banner_image`'],
     ['table' => 'settings', 'column' => 'id',                 'sql' => null], // sadece kontrol, tablo zaten var
-    ['table' => 'users',    'column' => 'must_change_password','sql' => 'ALTER TABLE `users` ADD COLUMN `must_change_password` TINYINT(1) NOT NULL DEFAULT 0 AFTER `email`'],
+    // Eski kurulumlarda users tablosunda email kolonu olmayabiliyor.
+    ['table' => 'users',    'column' => 'email',              'sql' => 'ALTER TABLE `users` ADD COLUMN `email` VARCHAR(200) NULL'],
+    // AFTER email gibi konum belirten SQL'ler, email kolonu yoksa hata verir. Konum belirtmeden ekliyoruz.
+    ['table' => 'users',    'column' => 'must_change_password','sql' => 'ALTER TABLE `users` ADD COLUMN `must_change_password` TINYINT(1) NOT NULL DEFAULT 0'],
     ['table' => 'home_sections', 'column' => 'section_type',  'sql' => null], // tablo kontrolü yeterli
     ['table' => 'footer_links',  'column' => 'column_label',  'sql' => 'ALTER TABLE `footer_links` ADD COLUMN `column_label` VARCHAR(100) NOT NULL DEFAULT \'\' AFTER `column_key`'],
 ];

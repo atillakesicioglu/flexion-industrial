@@ -2,9 +2,55 @@
 
 require_once __DIR__ . '/includes/header.php';
 
-$pdo = db();
+$pdo       = db();
 $productId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
+// ---- Bilgi Al formu POST işlemi ----
+$inquirySent  = false;
+$inquiryError = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['inquiry_submit'])) {
+    $iName    = trim($_POST['inq_name']    ?? '');
+    $iSurname = trim($_POST['inq_surname'] ?? '');
+    $iEmail   = trim($_POST['inq_email']   ?? '');
+    $iPhone   = trim($_POST['inq_phone']   ?? '');
+    $iCompany = trim($_POST['inq_company'] ?? '');
+    $iCountry = trim($_POST['inq_country'] ?? '');
+    $iMsg     = trim($_POST['inq_message'] ?? '');
+    $iPid     = (int)($_POST['inq_product_id'] ?? 0);
+
+    if (!$iName || !$iEmail || !$iMsg) {
+        $inquiryError = 'Ad, e-posta ve mesaj zorunludur.';
+    } elseif (!filter_var($iEmail, FILTER_VALIDATE_EMAIL)) {
+        $inquiryError = 'Geçerli bir e-posta adresi girin.';
+    } else {
+        $fullName = trim($iName . ' ' . $iSurname);
+        try {
+            $ins = $pdo->prepare('INSERT INTO contact_submissions
+                (type,product_id,name,email,phone,company,country,message)
+                VALUES(:type,:pid,:name,:email,:phone,:company,:country,:msg)');
+            $ins->execute([
+                ':type'    => 'inquiry',
+                ':pid'     => $iPid ?: null,
+                ':name'    => $fullName,
+                ':email'   => $iEmail,
+                ':phone'   => $iPhone  ?: null,
+                ':company' => $iCompany ?: null,
+                ':country' => $iCountry ?: null,
+                ':msg'     => $iMsg,
+            ]);
+        } catch (Throwable $e2) { /* tablo henüz yoksa sessizce geç */ }
+        // E-posta bildirim
+        $toMail = get_setting('contact_email', '');
+        if ($toMail) {
+            $subj = 'Flexion Bilgi Talebi - ' . ($iCompany ?: $fullName);
+            $body = "Ürün ID: $iPid\nAd: $fullName\nE-posta: $iEmail\nTelefon: $iPhone\nŞirket: $iCompany\nÜlke: $iCountry\n\nMesaj:\n$iMsg";
+            @mail($toMail, $subj, $body, "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com'));
+        }
+        $inquirySent = true;
+    }
+}
+
+// ---- Ürün verisi ----
 try {
     $stmt = $pdo->prepare('SELECT p.*, c.name AS category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.id = :id AND p.is_active = 1 LIMIT 1');
     $stmt->execute([':id' => $productId]);
@@ -32,7 +78,7 @@ try {
     $stmt = $pdo->prepare('SELECT * FROM product_regulations WHERE product_id = :pid AND is_active = 1 ORDER BY sort_order ASC, id ASC');
     $stmt->execute([':pid' => $productId]);
     $regulations = $stmt->fetchAll();
-} catch (Throwable $e) { /* tablo yoksa boş */ }
+} catch (Throwable $e) {}
 
 // Spec tables + rows
 $specTables      = [];
@@ -41,7 +87,6 @@ try {
     $stmt = $pdo->prepare('SELECT * FROM product_spec_tables WHERE product_id = :pid AND is_active = 1 ORDER BY sort_order ASC, id ASC');
     $stmt->execute([':pid' => $productId]);
     $specTables = $stmt->fetchAll();
-
     if ($specTables) {
         $tableIds = array_column($specTables, 'id');
         $in       = implode(',', array_fill(0, count($tableIds), '?'));
@@ -51,7 +96,7 @@ try {
             $specRowsByTable[$row['table_id']][] = $row;
         }
     }
-} catch (Throwable $e) { /* tablo yoksa boş */ }
+} catch (Throwable $e) {}
 
 // Ek görseller
 $extraImages = [];
@@ -59,7 +104,7 @@ try {
     $imgStmt = $pdo->prepare('SELECT * FROM product_images WHERE product_id = :pid ORDER BY sort_order ASC, id ASC');
     $imgStmt->execute([':pid' => $productId]);
     $extraImages = $imgStmt->fetchAll();
-} catch (Throwable $e) { /* tablo yoksa boş */ }
+} catch (Throwable $e) {}
 
 // Dokümanlar
 $documents = [];
@@ -67,70 +112,84 @@ try {
     $docStmt = $pdo->prepare('SELECT * FROM product_documents WHERE product_id = :pid AND is_active = 1 ORDER BY sort_order ASC, id ASC');
     $docStmt->execute([':pid' => $productId]);
     $documents = $docStmt->fetchAll();
-} catch (Throwable $e) { /* tablo yoksa boş */ }
+} catch (Throwable $e) {}
 
-// Benzer ürünler (aynı kategoriden, kendisi hariç)
+// Benzer ürünler
 $relatedProducts = [];
 try {
     $relatedStmt = $pdo->prepare('SELECT id, name, main_image, code FROM products WHERE category_id = :cid AND id <> :id AND is_active = 1 ORDER BY sort_order ASC, id ASC LIMIT 3');
     $relatedStmt->execute([':cid' => $product['category_id'], ':id' => $productId]);
     $relatedProducts = $relatedStmt->fetchAll();
-} catch (Throwable $e) { /* tablo yoksa boş */ }
+} catch (Throwable $e) {}
 ?>
 
 <section class="py-5">
     <div class="container">
-        <div class="row mb-4">
-            <div class="col-md-6 mb-3 mb-md-0">
+
+        <!-- Breadcrumb -->
+        <nav class="mb-4" aria-label="breadcrumb">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a href="index.php">Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a href="sectors.php">Ürünler</a></li>
+                <li class="breadcrumb-item">
+                    <a href="category.php?id=<?= e((string)$product['category_id']) ?>"><?= e($product['category_name']) ?></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page"><?= e($product['name']) ?></li>
+            </ol>
+        </nav>
+
+        <div class="row g-4 mb-5">
+            <!-- Görseller -->
+            <div class="col-md-5 fx-animate">
                 <?php if (!empty($product['main_image'])): ?>
-                    <img id="main-product-img" src="<?= e($product['main_image']) ?>" alt="<?= e($product['name']) ?>" class="img-fluid rounded-3 shadow-sm w-100" style="max-height:380px;object-fit:contain;">
+                    <img id="main-product-img"
+                         src="<?= e($product['main_image']) ?>"
+                         alt="<?= e($product['name']) ?>"
+                         class="img-fluid rounded-3 shadow-sm w-100"
+                         style="max-height:380px;object-fit:contain;">
                 <?php else: ?>
                     <div class="bg-light border rounded-3 d-flex align-items-center justify-content-center" style="min-height:260px;">
-                        <span class="text-muted">Ürün görseli henüz eklenmemiş</span>
+                        <span class="text-muted small">Ürün görseli henüz eklenmemiş</span>
                     </div>
                 <?php endif; ?>
 
-                <?php if (!empty($extraImages)): ?>
+                <?php if (!empty($extraImages) || !empty($product['main_image'])): ?>
                     <div class="d-flex gap-2 mt-3 flex-wrap">
                         <?php if (!empty($product['main_image'])): ?>
                             <img src="<?= e($product['main_image']) ?>"
-                                 alt="Ana görsel"
-                                 height="60"
-                                 class="rounded border border-primary gallery-thumb"
-                                 style="cursor:pointer;object-fit:cover;width:60px;"
+                                 height="56" class="rounded border gallery-thumb"
+                                 style="cursor:pointer;object-fit:cover;width:56px;"
                                  onclick="document.getElementById('main-product-img').src=this.src">
                         <?php endif; ?>
                         <?php foreach ($extraImages as $eImg): ?>
                             <img src="<?= e($eImg['image']) ?>"
-                                 alt=""
-                                 height="60"
-                                 class="rounded border gallery-thumb"
-                                 style="cursor:pointer;object-fit:cover;width:60px;"
+                                 height="56" class="rounded border gallery-thumb"
+                                 style="cursor:pointer;object-fit:cover;width:56px;"
                                  onclick="document.getElementById('main-product-img').src=this.src">
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
             </div>
-            <div class="col-md-6">
-                <p class="small text-muted mb-1">
-                    <?= e($product['category_name']) ?>
-                </p>
-                <h1 class="h3 mb-2"><?= e($product['name']) ?></h1>
+
+            <!-- Detaylar -->
+            <div class="col-md-7 fx-animate" data-delay="80">
+                <p class="small text-muted mb-1"><?= e($product['category_name']) ?></p>
+                <h1 class="h3 mb-1"><?= e($product['name']) ?></h1>
                 <?php if (!empty($product['code'])): ?>
                     <p class="small text-muted mb-3">Ürün kodu: <strong><?= e($product['code']) ?></strong></p>
                 <?php endif; ?>
                 <?php if (!empty($product['short_description'])): ?>
-                    <p class="mb-3"><?= e($product['short_description']) ?></p>
+                    <p class="mb-4 text-muted"><?= e($product['short_description']) ?></p>
                 <?php endif; ?>
 
                 <?php if ($regulations): ?>
-                    <div class="mb-3">
-                        <h2 class="h6 mb-2">Regülasyonlar & Sertifikalar</h2>
+                    <div class="mb-4">
+                        <h2 class="h6 mb-2 text-uppercase text-muted" style="font-size:.75rem;letter-spacing:.05em;">Regülasyonlar &amp; Sertifikalar</h2>
                         <div class="d-flex flex-wrap gap-2">
                             <?php foreach ($regulations as $reg): ?>
-                                <div class="border rounded-pill px-3 py-1 small d-flex align-items-center bg-light">
+                                <div class="border rounded-pill px-3 py-1 small d-flex align-items-center bg-light gap-2">
                                     <?php if (!empty($reg['icon'])): ?>
-                                        <img src="<?= e($reg['icon']) ?>" alt="<?= e($reg['title']) ?>" height="20" class="me-2">
+                                        <img src="<?= e($reg['icon']) ?>" alt="<?= e($reg['title']) ?>" height="18">
                                     <?php endif; ?>
                                     <span><?= e($reg['title']) ?></span>
                                 </div>
@@ -138,88 +197,191 @@ try {
                         </div>
                     </div>
                 <?php endif; ?>
-            </div>
-        </div>
 
-        <?php if (!empty($product['description'])): ?>
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h2 class="h5 mb-3">Ürün Açıklaması</h2>
-                    <div class="text-muted small">
-                        <?= $product['description'] ?>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($specTables): ?>
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h2 class="h5 mb-3">Teknik Özellikler</h2>
-                </div>
-                <?php foreach ($specTables as $table): ?>
-                    <div class="col-12 mb-3">
-                        <?php if (!empty($table['title'])): ?>
-                            <h3 class="h6 mb-2"><?= e($table['title']) ?></h3>
-                        <?php endif; ?>
-                        <div class="table-responsive">
-                            <table class="table table-sm align-middle">
-                                <tbody>
-                                <?php foreach ($specRowsByTable[$table['id']] ?? [] as $row): ?>
-                                    <tr>
-                                        <th style="width:40%;"><?= e($row['label']) ?></th>
-                                        <td><?= e($row['value']) ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if (!empty($documents)): ?>
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h2 class="h5 mb-3">Dokümanlar</h2>
-                    <div class="list-group">
+                <!-- Doküman Butonları -->
+                <?php if (!empty($documents)): ?>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
                         <?php foreach ($documents as $doc): ?>
-                            <a href="<?= e($doc['file_path']) ?>" target="_blank" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                                <i class="bi bi-file-earmark-arrow-down fs-5 text-primary"></i>
-                                <span><?= e($doc['title']) ?></span>
-                                <span class="ms-auto small text-muted">İndir</span>
+                            <a href="<?= e($doc['file_path']) ?>" target="_blank" rel="noopener"
+                               class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-arrow-down"></i>
+                                <?= e($doc['title']) ?>
                             </a>
                         <?php endforeach; ?>
                     </div>
+                <?php endif; ?>
+
+                <!-- Bilgi Al Butonu -->
+                <button type="button" class="btn btn-primary px-5 py-2"
+                        data-bs-toggle="modal" data-bs-target="#inquiryModal">
+                    <i class="bi bi-envelope me-2"></i>Bilgi Al
+                </button>
+            </div>
+        </div>
+
+        <!-- Ürün Açıklaması -->
+        <?php if (!empty($product['description'])): ?>
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="product-description">
+                    <?= $product['description'] ?>
                 </div>
             </div>
+        </div>
         <?php endif; ?>
 
-        <?php if ($relatedProducts): ?>
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h2 class="h5 mb-3">Benzer Ürünler</h2>
-                </div>
-                <?php foreach ($relatedProducts as $rp): ?>
-                    <div class="col-md-4 mb-3">
-                        <a href="product.php?id=<?= e((string) $rp['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
-                            <?php if (!empty($rp['main_image'])): ?>
-                                <img src="<?= e($rp['main_image']) ?>" class="card-img-top" alt="<?= e($rp['name']) ?>">
-                            <?php endif; ?>
-                            <div class="card-body py-3">
-                                <h3 class="h6 mb-1"><?= e($rp['name']) ?></h3>
-                                <?php if (!empty($rp['code'])): ?>
-                                    <p class="small text-muted mb-0">Kod: <?= e($rp['code']) ?></p>
-                                <?php endif; ?>
-                            </div>
-                        </a>
-                    </div>
-                <?php endforeach; ?>
+        <!-- Teknik Özellikler Tabloları -->
+        <?php if ($specTables): ?>
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="h5 mb-3">Teknik Özellikler</h2>
             </div>
+            <?php foreach ($specTables as $table): ?>
+                <div class="col-12 mb-4">
+                    <?php if (!empty($table['title'])): ?>
+                        <h3 class="h6 mb-2 text-muted"><?= e($table['title']) ?></h3>
+                    <?php endif; ?>
+                    <div class="table-responsive">
+                        <table class="product-spec-table">
+                            <tbody>
+                            <?php $rows = $specRowsByTable[$table['id']] ?? []; ?>
+                            <?php if (empty($rows)): ?>
+                                <tr><td colspan="2" class="text-muted small">Tablo boş</td></tr>
+                            <?php else: ?>
+                                <?php foreach ($rows as $row): ?>
+                                <tr>
+                                    <td><?= e($row['label']) ?></td>
+                                    <td><?= e($row['value']) ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+
+        <!-- Benzer Ürünler -->
+        <?php if ($relatedProducts): ?>
+        <div class="row mb-4">
+            <div class="col-12 mb-3">
+                <h2 class="h5">Benzer Ürünler</h2>
+            </div>
+            <?php foreach ($relatedProducts as $rp): ?>
+                <div class="col-md-4 fx-animate">
+                    <a href="product.php?id=<?= e((string) $rp['id']) ?>"
+                       class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
+                        <?php if (!empty($rp['main_image'])): ?>
+                            <img src="<?= e($rp['main_image']) ?>" class="card-img-top fx-card-img" alt="<?= e($rp['name']) ?>">
+                        <?php else: ?>
+                            <div class="fx-card-img bg-light d-flex align-items-center justify-content-center text-muted">
+                                <i class="bi bi-box-seam fs-2"></i>
+                            </div>
+                        <?php endif; ?>
+                        <div class="card-body py-3">
+                            <h3 class="h6 mb-1"><?= e($rp['name']) ?></h3>
+                            <?php if (!empty($rp['code'])): ?>
+                                <p class="small text-muted mb-0">Kod: <?= e($rp['code']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
         <?php endif; ?>
     </div>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<!-- ================================================
+     Bilgi Al Modal
+================================================ -->
+<div class="modal fade" id="inquiryModal" tabindex="-1" aria-labelledby="inquiryModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inquiryModalLabel">
+                    <i class="bi bi-envelope me-2"></i>Bilgi Talebi — <?= e($product['name']) ?>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <?php if ($inquirySent): ?>
+                    <div class="fx-success-anim text-center py-4">
+                        <span style="font-size:3.5rem;color:#e61421;"><i class="bi bi-check-circle-fill"></i></span>
+                        <h2 class="h5 mt-3 mb-2">Talebiniz alındı!</h2>
+                        <p class="text-muted">En kısa sürede size dönüş yapacağız.</p>
+                        <button class="btn btn-outline-secondary btn-sm mt-2" data-bs-dismiss="modal">Kapat</button>
+                    </div>
+                <?php elseif ($inquiryError): ?>
+                    <div class="alert alert-danger py-2 small"><?= e($inquiryError) ?></div>
+                    <?php // Form aşağıda render edilecek ?>
+                <?php endif; ?>
 
+                <?php if (!$inquirySent): ?>
+                <form method="post">
+                    <input type="hidden" name="inquiry_submit" value="1">
+                    <input type="hidden" name="inq_product_id" value="<?= e((string)$productId) ?>">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label">Ad <span class="text-danger">*</span></label>
+                            <input type="text" name="inq_name" class="form-control" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Soyad</label>
+                            <input type="text" name="inq_surname" class="form-control">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">E-posta <span class="text-danger">*</span></label>
+                            <input type="email" name="inq_email" class="form-control" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Telefon</label>
+                            <input type="tel" name="inq_phone" class="form-control">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Şirket</label>
+                            <input type="text" name="inq_company" class="form-control">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Ülke</label>
+                            <input type="text" name="inq_country" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Mesaj <span class="text-danger">*</span></label>
+                            <textarea name="inq_message" class="form-control" rows="4" required
+                                      placeholder="Bilgi almak istediğiniz konuyu yazın..."></textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="kvkk" required>
+                                <label class="form-check-label small" for="kvkk">
+                                    Kişisel verilerimin işlenmesine ilişkin <a href="page.php?slug=kvkk" target="_blank">KVKK Aydınlatma Metni</a>'ni okudum ve onaylıyorum.
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer px-0 pb-0 mt-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-primary px-5">
+                            <i class="bi bi-send me-2"></i>Gönder
+                        </button>
+                    </div>
+                </form>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php if ($inquirySent): ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = new bootstrap.Modal(document.getElementById('inquiryModal'));
+        modal.show();
+    });
+</script>
+<?php endif; ?>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

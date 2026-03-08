@@ -372,8 +372,32 @@ if ($editId) {
     }
 }
 
+// Filtre & arama
+$filterCat    = isset($_GET['cat'])    ? (int)$_GET['cat']        : 0;
+$filterSearch = isset($_GET['search']) ? trim($_GET['search'])     : '';
+$filterStatus = $_GET['status'] ?? '';
+
 try {
-    $products = $pdo->query('SELECT p.*, c.name AS cat_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.sort_order ASC, p.name ASC')->fetchAll();
+    $whereParts = [];
+    $whereParams = [];
+    if ($filterCat > 0) {
+        $whereParts[] = 'p.category_id = :fcat';
+        $whereParams[':fcat'] = $filterCat;
+    }
+    if ($filterSearch !== '') {
+        $whereParts[] = '(p.name LIKE :fsearch OR p.code LIKE :fsearch2)';
+        $whereParams[':fsearch']  = '%' . $filterSearch . '%';
+        $whereParams[':fsearch2'] = '%' . $filterSearch . '%';
+    }
+    if ($filterStatus === 'active') {
+        $whereParts[] = 'p.is_active = 1';
+    } elseif ($filterStatus === 'passive') {
+        $whereParts[] = 'p.is_active = 0';
+    }
+    $whereSQL = $whereParts ? 'WHERE ' . implode(' AND ', $whereParts) : '';
+    $stmt = $pdo->prepare("SELECT p.*, c.name AS cat_name FROM products p LEFT JOIN categories c ON p.category_id = c.id $whereSQL ORDER BY p.sort_order ASC, p.name ASC");
+    $stmt->execute($whereParams);
+    $products = $stmt->fetchAll();
 } catch (Throwable $e) {
     $products = [];
     $error = 'Ürün listesi alınamadı. Lütfen <a href="migrate.php">migrasyonu</a> çalıştırın. Hata: ' . htmlspecialchars($e->getMessage());
@@ -391,9 +415,47 @@ include __DIR__ . '/partials_header.php';
     <!-- SOL: Ürün Listesi -->
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <strong>Ürünler (<?= count($products) ?>)</strong>
-                <a href="products.php" class="btn btn-sm btn-primary">+ Yeni Ürün</a>
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Ürünler (<?= count($products) ?>)</strong>
+                    <a href="products.php" class="btn btn-sm btn-primary">+ Yeni Ürün</a>
+                </div>
+                <!-- Filtre satırı -->
+                <form method="get" class="row g-2">
+                    <div class="col-sm-4">
+                        <input type="text" name="search" class="form-control form-control-sm"
+                               placeholder="Ürün adı veya kodu..."
+                               value="<?= e($filterSearch) ?>">
+                    </div>
+                    <div class="col-sm-3">
+                        <select name="cat" class="form-select form-select-sm">
+                            <option value="">Tüm Kategoriler</option>
+                            <?php foreach ($categories as $c): ?>
+                                <option value="<?= e((string)$c['id']) ?>"
+                                    <?= $filterCat === (int)$c['id'] ? 'selected' : '' ?>>
+                                    <?= e($c['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="">Tüm Durumlar</option>
+                            <option value="active"  <?= $filterStatus === 'active'  ? 'selected' : '' ?>>Aktif</option>
+                            <option value="passive" <?= $filterStatus === 'passive' ? 'selected' : '' ?>>Pasif</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Filtrele</button>
+                    </div>
+                    <?php if ($filterCat || $filterSearch || $filterStatus): ?>
+                        <div class="col-12">
+                            <a href="products.php" class="btn btn-sm btn-link p-0 text-danger">
+                                <i class="bi bi-x-circle me-1"></i>Filtreyi Temizle
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </form>
             </div>
             <div class="card-body p-0">
                 <form method="post">

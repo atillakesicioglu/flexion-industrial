@@ -215,20 +215,51 @@ $columnMigrations = [
     ['table' => 'menu_items',  'column' => 'sort_order',        'sql' => 'ALTER TABLE `menu_items` ADD COLUMN `sort_order` INT NOT NULL DEFAULT 0'],
     ['table' => 'menu_items',  'column' => 'parent_id',         'sql' => 'ALTER TABLE `menu_items` ADD COLUMN `parent_id` INT UNSIGNED NULL DEFAULT NULL'],
     // footer_links
-    ['table' => 'footer_links',  'column' => 'column_label',    'sql' => 'ALTER TABLE `footer_links` ADD COLUMN `column_label` VARCHAR(100) NOT NULL DEFAULT \'\' AFTER `column_key`'],
-    ['table' => 'footer_links',  'column' => 'is_active',       'sql' => 'ALTER TABLE `footer_links` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1'],
+    ['table' => 'footer_links',  'column' => 'column_label',      'sql' => 'ALTER TABLE `footer_links` ADD COLUMN `column_label` VARCHAR(100) NOT NULL DEFAULT \'\' AFTER `column_key`'],
+    ['table' => 'footer_links',  'column' => 'is_active',         'sql' => 'ALTER TABLE `footer_links` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1'],
+    // pages banner stil kolonları (db_patch1)
+    ['table' => 'pages', 'column' => 'banner_opacity',        'sql' => 'ALTER TABLE `pages` ADD COLUMN `banner_opacity` TINYINT NOT NULL DEFAULT 50'],
+    ['table' => 'pages', 'column' => 'banner_blur',           'sql' => 'ALTER TABLE `pages` ADD COLUMN `banner_blur` TINYINT NOT NULL DEFAULT 0'],
+    ['table' => 'pages', 'column' => 'banner_title_color',    'sql' => 'ALTER TABLE `pages` ADD COLUMN `banner_title_color` VARCHAR(20) NOT NULL DEFAULT \'#ffffff\''],
+    ['table' => 'pages', 'column' => 'banner_title_size',     'sql' => 'ALTER TABLE `pages` ADD COLUMN `banner_title_size` VARCHAR(10) NOT NULL DEFAULT \'2rem\''],
+    ['table' => 'pages', 'column' => 'banner_title_position', 'sql' => 'ALTER TABLE `pages` ADD COLUMN `banner_title_position` VARCHAR(10) NOT NULL DEFAULT \'center\''],
 ];
 
 $settingDefaults = [
-    'site_title'          => 'Flexion Industrial',
-    'logo_height'         => '40',
-    'news_banner_title'   => 'Haberler & Insights',
-    'news_banner_image'   => '',
-    'company_address'     => '',
-    'company_phone'       => '',
-    'company_email'       => '',
-    'footer_about'        => '',
+    'site_title'               => 'Flexion Industrial',
+    'logo_height'              => '40',
+    'news_banner_title'        => 'Haberler & Insights',
+    'news_banner_image'        => '',
+    'news_banner_opacity'      => '50',
+    'news_banner_blur'         => '0',
+    'news_banner_title_color'  => '#ffffff',
+    'news_banner_title_size'   => '2rem',
+    'news_banner_title_position' => 'center',
+    'google_maps_embed'        => '',
+    'show_header_title'        => '1',
+    'company_address'          => '',
+    'company_phone'            => '',
+    'company_email'            => '',
+    'footer_about'             => '',
 ];
+
+// contact_submissions tablosu
+$tableMigrations['contact_submissions'] = "CREATE TABLE `contact_submissions` (
+    `id`         INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    `type`       VARCHAR(30)   NOT NULL DEFAULT 'contact',
+    `product_id` INT UNSIGNED  NULL     DEFAULT NULL,
+    `name`       VARCHAR(200)  NOT NULL DEFAULT '',
+    `email`      VARCHAR(200)  NOT NULL DEFAULT '',
+    `phone`      VARCHAR(50)   NULL     DEFAULT NULL,
+    `company`    VARCHAR(200)  NULL     DEFAULT NULL,
+    `country`    VARCHAR(100)  NULL     DEFAULT NULL,
+    `message`    TEXT          NOT NULL,
+    `is_read`    TINYINT(1)    NOT NULL DEFAULT 0,
+    `created_at` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_type` (`type`),
+    KEY `idx_product_id` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
 /* ================================================================
    Migrasyon işlemi

@@ -30,11 +30,25 @@ if ($slug) {
     <?php
     $bannerImg   = get_setting('news_banner_image', '');
     $bannerTitle = get_setting('news_banner_title', 'Haberler & Insights');
+    $nOpacity    = max(0, min(100, (int) get_setting('news_banner_opacity', '50')));
+    $nBlur       = max(0, min(20,  (int) get_setting('news_banner_blur', '0')));
+    $nTColor     = get_setting('news_banner_title_color', '#ffffff');
+    $nTSize      = get_setting('news_banner_title_size', '2rem');
+    $nTPos       = get_setting('news_banner_title_position', 'center');
+    $nAlignMap   = ['left'=>'text-start','center'=>'text-center','right'=>'text-end'];
+    $nAlignClass = $nAlignMap[$nTPos] ?? 'text-center';
     if ($bannerImg): ?>
-        <section class="fx-page-banner d-flex align-items-center mb-4"
-                 style="background-image:url('<?= e($bannerImg) ?>');">
-            <div class="container">
-                <h1 class="h3 text-white mb-0"><?= e($bannerTitle) ?></h1>
+        <section class="fx-page-banner mb-0">
+            <div class="fx-banner-bg" style="background-image:url('<?= e($bannerImg) ?>');
+                 filter:blur(<?= $nBlur ?>px); transform:scale(1.05);"></div>
+            <div class="fx-banner-overlay" style="background:rgba(0,0,0,<?= round($nOpacity/100,2) ?>);"></div>
+            <div class="fx-banner-content">
+                <div class="container <?= $nAlignClass ?>">
+                    <h1 class="fx-banner-title"
+                        style="color:<?= e($nTColor) ?>;font-size:<?= e($nTSize) ?>;">
+                        <?= e($bannerTitle) ?>
+                    </h1>
+                </div>
             </div>
         </section>
     <?php endif; ?>
@@ -94,11 +108,25 @@ try {
 <?php
 $bannerImg   = get_setting('news_banner_image', '');
 $bannerTitle = get_setting('news_banner_title', 'Haberler & Insights');
+$nOpacity2   = max(0, min(100, (int) get_setting('news_banner_opacity', '50')));
+$nBlur2      = max(0, min(20,  (int) get_setting('news_banner_blur', '0')));
+$nTColor2    = get_setting('news_banner_title_color', '#ffffff');
+$nTSize2     = get_setting('news_banner_title_size', '2rem');
+$nTPos2      = get_setting('news_banner_title_position', 'center');
+$nAlignMap2  = ['left'=>'text-start','center'=>'text-center','right'=>'text-end'];
+$nAlignCls2  = $nAlignMap2[$nTPos2] ?? 'text-center';
 if ($bannerImg): ?>
-    <section class="fx-page-banner d-flex align-items-center mb-4"
-             style="background-image:url('<?= e($bannerImg) ?>');">
-        <div class="container">
-            <h1 class="h3 text-white mb-0"><?= e($bannerTitle) ?></h1>
+    <section class="fx-page-banner mb-0">
+        <div class="fx-banner-bg" style="background-image:url('<?= e($bannerImg) ?>');
+             filter:blur(<?= $nBlur2 ?>px); transform:scale(1.05);"></div>
+        <div class="fx-banner-overlay" style="background:rgba(0,0,0,<?= round($nOpacity2/100,2) ?>);"></div>
+        <div class="fx-banner-content">
+            <div class="container <?= $nAlignCls2 ?>">
+                <h1 class="fx-banner-title"
+                    style="color:<?= e($nTColor2) ?>;font-size:<?= e($nTSize2) ?>;">
+                    <?= e($bannerTitle) ?>
+                </h1>
+            </div>
         </div>
     </section>
 <?php endif; ?>
@@ -113,10 +141,14 @@ if ($bannerImg): ?>
         </div>
         <div class="row g-3">
             <?php foreach ($items as $news): ?>
-                <div class="col-md-4">
+                <div class="col-md-4 fx-animate">
                     <a href="news.php?slug=<?= e($news['slug']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                         <?php if (!empty($news['image'])): ?>
-                            <img src="<?= e($news['image']) ?>" class="card-img-top" alt="<?= e($news['title']) ?>">
+                            <img src="<?= e($news['image']) ?>" class="card-img-top fx-card-img" alt="<?= e($news['title']) ?>">
+                        <?php else: ?>
+                            <div class="fx-card-img bg-light d-flex align-items-center justify-content-center text-muted">
+                                <i class="bi bi-newspaper fs-2"></i>
+                            </div>
                         <?php endif; ?>
                         <div class="card-body">
                             <h2 class="h6 mb-2"><?= e($news['title']) ?></h2>

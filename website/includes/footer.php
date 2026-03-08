@@ -125,5 +125,26 @@ foreach ($footerLinksRaw as $fl) {
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Scroll tabanlı animasyon
+(function () {
+    var els = document.querySelectorAll('.fx-animate');
+    if (!els.length) return;
+    var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry, i) {
+            if (entry.isIntersecting) {
+                var el = entry.target;
+                var delay = (el.dataset.delay || 0);
+                setTimeout(function () { el.classList.add('fx-visible'); }, delay);
+                io.unobserve(el);
+            }
+        });
+    }, { threshold: 0.12 });
+    els.forEach(function (el, i) {
+        if (!el.dataset.delay) el.dataset.delay = i * 60;
+        io.observe(el);
+    });
+}());
+</script>
 </body>
 </html>

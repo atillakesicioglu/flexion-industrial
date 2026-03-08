@@ -2,8 +2,19 @@
 
 require_once __DIR__ . '/includes/header.php';
 
-$pdo  = db();
+$pdo = db();
+
+// Slug: önce ?slug=, yoksa temiz URL path'inden al
 $slug = trim($_GET['slug'] ?? '');
+if (!$slug) {
+    // /hakkimizda → hakkimizda
+    $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    $slug = trim(basename($path), '/');
+    // Bilinen PHP dosyaları ve dizinleri pas geç
+    if (pathinfo($slug, PATHINFO_EXTENSION)) {
+        $slug = '';
+    }
+}
 
 if (!$slug) {
     http_response_code(404);
@@ -32,124 +43,224 @@ if (!$page) {
     require_once __DIR__ . '/includes/footer.php';
     exit;
 }
+
+// ---- Banner render ----
+$bannerImg   = $page['banner_image'] ?? '';
+$bannerTitle = !empty($page['banner_title']) ? $page['banner_title'] : $page['title'];
+$bOpacity    = max(0, min(100, (int)($page['banner_opacity'] ?? 50)));
+$bBlur       = max(0, min(20,  (int)($page['banner_blur'] ?? 0)));
+$bTitleColor = $page['banner_title_color'] ?? '#ffffff';
+$bTitleSize  = $page['banner_title_size']  ?? '2rem';
+$bTitlePos   = $page['banner_title_position'] ?? 'center';
+
+$textAlignMap = ['left' => 'text-start', 'center' => 'text-center', 'right' => 'text-end'];
+$textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
 ?>
 
-<?php if (!empty($page['banner_image'])): ?>
-    <section class="fx-page-banner d-flex align-items-center mb-4"
-             style="background-image:url('<?= e($page['banner_image']) ?>');">
-        <div class="container">
-            <?php if (!empty($page['banner_title'])): ?>
-                <h1 class="h3 text-white mb-0"><?= e($page['banner_title']) ?></h1>
-            <?php else: ?>
-                <h1 class="h3 text-white mb-0"><?= e($page['title']) ?></h1>
-            <?php endif; ?>
+<?php if ($bannerImg): ?>
+<section class="fx-page-banner mb-0">
+    <div class="fx-banner-bg" style="background-image:url('<?= e($bannerImg) ?>');
+         filter:blur(<?= $bBlur ?>px); transform:scale(1.05);"></div>
+    <div class="fx-banner-overlay" style="background:rgba(0,0,0,<?= round($bOpacity/100,2) ?>);"></div>
+    <div class="fx-banner-content">
+        <div class="container <?= $textAlignClass ?>">
+            <h1 class="fx-banner-title"
+                style="color:<?= e($bTitleColor) ?>;font-size:<?= e($bTitleSize) ?>;">
+                <?= e($bannerTitle) ?>
+            </h1>
         </div>
-    </section>
+    </div>
+</section>
 <?php endif; ?>
 
 <section class="py-5">
     <div class="container">
+
+        <?php if ($slug !== 'iletisim'): ?>
         <div class="row justify-content-center">
-            <div class="col-lg-8">
+            <div class="col-lg-8 fx-animate">
                 <h1 class="h2 mb-4"><?= e($page['title']) ?></h1>
                 <div class="page-content">
                     <?= $page['content'] ?>
                 </div>
+            </div>
+        </div>
+        <?php else: ?>
 
-                <?php if ($slug === 'iletisim'): ?>
-                    <hr class="my-4">
-                    <h2 class="h4 mb-3">İletişim Bilgileri</h2>
-                    <div class="row g-3 mb-4">
-                        <?php $phone = get_setting('contact_phone', ''); ?>
-                        <?php $email = get_setting('contact_email', ''); ?>
-                        <?php $address = get_setting('contact_address', ''); ?>
-                        <?php if ($phone): ?>
-                            <div class="col-sm-6">
-                                <div class="d-flex align-items-start gap-2">
-                                    <i class="bi bi-telephone text-primary mt-1"></i>
-                                    <div>
-                                        <div class="small fw-semibold">Telefon</div>
-                                        <a href="tel:<?= e($phone) ?>" class="text-decoration-none"><?= e($phone) ?></a>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                        <?php if ($email): ?>
-                            <div class="col-sm-6">
-                                <div class="d-flex align-items-start gap-2">
-                                    <i class="bi bi-envelope text-primary mt-1"></i>
-                                    <div>
-                                        <div class="small fw-semibold">E-posta</div>
-                                        <a href="mailto:<?= e($email) ?>" class="text-decoration-none"><?= e($email) ?></a>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                        <?php if ($address): ?>
-                            <div class="col-12">
-                                <div class="d-flex align-items-start gap-2">
-                                    <i class="bi bi-geo-alt text-primary mt-1"></i>
-                                    <div>
-                                        <div class="small fw-semibold">Adres</div>
-                                        <p class="mb-0"><?= e($address) ?></p>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
+        <!-- ================================================
+             İletişim Sayfası
+        ================================================ -->
+        <div class="row g-5">
+            <!-- Sol: Form + bilgiler -->
+            <div class="col-lg-6 fx-animate">
+                <h1 class="h2 mb-4"><?= e($page['title']) ?></h1>
+                <?php if ($page['content']): ?>
+                    <div class="page-content mb-4"><?= $page['content'] ?></div>
+                <?php endif; ?>
+
+                <!-- İletişim bilgileri -->
+                <?php
+                $cPhone   = get_setting('contact_phone', '');
+                $cEmail   = get_setting('contact_email', '');
+                $cAddress = get_setting('company_address', '') ?: get_setting('contact_address', '');
+                ?>
+                <div class="d-flex flex-column gap-3 mb-5">
+                    <?php if ($cPhone): ?>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="fx-contact-icon"><i class="bi bi-telephone-fill"></i></div>
+                        <div>
+                            <div class="small text-muted fw-semibold text-uppercase">Telefon</div>
+                            <a href="tel:<?= e(preg_replace('/\s+/', '', $cPhone)) ?>"
+                               class="text-decoration-none fw-semibold"><?= e($cPhone) ?></a>
+                        </div>
                     </div>
+                    <?php endif; ?>
+                    <?php if ($cEmail): ?>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="fx-contact-icon"><i class="bi bi-envelope-fill"></i></div>
+                        <div>
+                            <div class="small text-muted fw-semibold text-uppercase">E-posta</div>
+                            <a href="mailto:<?= e($cEmail) ?>"
+                               class="text-decoration-none fw-semibold"><?= e($cEmail) ?></a>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if ($cAddress): ?>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="fx-contact-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                        <div>
+                            <div class="small text-muted fw-semibold text-uppercase">Adres</div>
+                            <span><?= e($cAddress) ?></span>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
 
-                    <h2 class="h4 mb-3">Bize Yazın</h2>
-                    <?php
-                    $formSent  = false;
-                    $formError = null;
-                    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['contact_submit'])) {
-                        $cName    = trim($_POST['contact_name'] ?? '');
-                        $cEmail   = trim($_POST['contact_email'] ?? '');
-                        $cMessage = trim($_POST['contact_message'] ?? '');
-                        if (!$cName || !$cEmail || !$cMessage) {
-                            $formError = 'Lütfen tüm alanları doldurun.';
-                        } elseif (!filter_var($cEmail, FILTER_VALIDATE_EMAIL)) {
-                            $formError = 'Geçerli bir e-posta adresi girin.';
-                        } else {
-                            $to      = $email ?: get_setting('contact_email', '');
-                            $subject = 'Flexion Web - İletişim Formu: ' . $cName;
-                            $body    = "Ad: $cName\nE-posta: $cEmail\n\nMesaj:\n$cMessage";
-                            if ($to) {
-                                @mail($to, $subject, $body, "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com'));
-                            }
-                            $formSent = true;
+                <!-- Form -->
+                <?php
+                $formSent  = false;
+                $formError = null;
+                if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['contact_submit'])) {
+                    $cName    = trim($_POST['contact_name']    ?? '');
+                    $cSurname = trim($_POST['contact_surname'] ?? '');
+                    $cEmail2  = trim($_POST['contact_email']   ?? '');
+                    $cPhone2  = trim($_POST['contact_phone']   ?? '');
+                    $cCompany = trim($_POST['contact_company'] ?? '');
+                    $cMsg     = trim($_POST['contact_message'] ?? '');
+
+                    if (!$cName || !$cEmail2 || !$cMsg) {
+                        $formError = 'Lütfen zorunlu alanları doldurun (Ad, E-posta, Mesaj).';
+                    } elseif (!filter_var($cEmail2, FILTER_VALIDATE_EMAIL)) {
+                        $formError = 'Geçerli bir e-posta adresi girin.';
+                    } else {
+                        $fullName = trim($cName . ' ' . $cSurname);
+                        // DB'ye kaydet
+                        try {
+                            $ins = $pdo->prepare('INSERT INTO contact_submissions
+                                (type,name,email,phone,company,message)
+                                VALUES(:type,:name,:email,:phone,:company,:msg)');
+                            $ins->execute([
+                                ':type'    => 'contact',
+                                ':name'    => $fullName,
+                                ':email'   => $cEmail2,
+                                ':phone'   => $cPhone2  ?: null,
+                                ':company' => $cCompany ?: null,
+                                ':msg'     => $cMsg,
+                            ]);
+                        } catch (Throwable $e2) { /* tablo henüz yoksa sessizce geç */ }
+                        // E-posta da gönder (isteğe bağlı)
+                        $toMail = get_setting('contact_email', '');
+                        if ($toMail) {
+                            $subj = 'Flexion İletişim: ' . $fullName;
+                            $body = "Ad: $fullName\nE-posta: $cEmail2\nTelefon: $cPhone2\nŞirket: $cCompany\n\nMesaj:\n$cMsg";
+                            @mail($toMail, $subj, $body, "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com'));
                         }
+                        $formSent = true;
                     }
-                    ?>
-                    <?php if ($formSent): ?>
-                        <div class="alert alert-success">Mesajınız alındı. En kısa sürede geri dönüş yapacağız.</div>
-                    <?php else: ?>
-                        <?php if ($formError): ?>
-                            <div class="alert alert-danger"><?= e($formError) ?></div>
-                        <?php endif; ?>
-                        <form method="post">
-                            <div class="mb-3">
-                                <label class="form-label">Ad Soyad</label>
+                }
+                ?>
+
+                <?php if ($formSent): ?>
+                <div class="fx-success-anim text-center py-5">
+                    <div class="mb-3">
+                        <span style="font-size:3.5rem;color:#e61421;"><i class="bi bi-check-circle-fill"></i></span>
+                    </div>
+                    <h2 class="h4 mb-2">Mesajınız alındı!</h2>
+                    <p class="text-muted">En kısa sürede size dönüş yapacağız.</p>
+                    <a href="<?= e($_SERVER['REQUEST_URI']) ?>" class="btn btn-outline-secondary btn-sm mt-2">Yeni mesaj gönder</a>
+                </div>
+                <?php else: ?>
+                <div class="fx-contact-form-wrap">
+                    <h2 class="h5 mb-4">Bize Yazın</h2>
+                    <?php if ($formError): ?>
+                        <div class="alert alert-danger py-2 small"><?= e($formError) ?></div>
+                    <?php endif; ?>
+                    <form method="post">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label">Ad <span class="text-danger">*</span></label>
                                 <input type="text" name="contact_name" class="form-control"
                                        value="<?= e($_POST['contact_name'] ?? '') ?>" required>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">E-posta</label>
+                            <div class="col-sm-6">
+                                <label class="form-label">Soyad</label>
+                                <input type="text" name="contact_surname" class="form-control"
+                                       value="<?= e($_POST['contact_surname'] ?? '') ?>">
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">E-posta <span class="text-danger">*</span></label>
                                 <input type="email" name="contact_email" class="form-control"
                                        value="<?= e($_POST['contact_email'] ?? '') ?>" required>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Mesaj</label>
+                            <div class="col-sm-6">
+                                <label class="form-label">Telefon</label>
+                                <input type="tel" name="contact_phone" class="form-control"
+                                       value="<?= e($_POST['contact_phone'] ?? '') ?>">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Şirket</label>
+                                <input type="text" name="contact_company" class="form-control"
+                                       value="<?= e($_POST['contact_company'] ?? '') ?>">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Mesaj <span class="text-danger">*</span></label>
                                 <textarea name="contact_message" class="form-control" rows="5" required><?= e($_POST['contact_message'] ?? '') ?></textarea>
                             </div>
-                            <button type="submit" name="contact_submit" value="1" class="btn btn-primary">
-                                Gönder
-                            </button>
-                        </form>
-                    <?php endif; ?>
+                            <div class="col-12">
+                                <button type="submit" name="contact_submit" value="1"
+                                        class="btn btn-primary px-5">
+                                    <i class="bi bi-send me-2"></i>Gönder
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Sağ: Google Maps -->
+            <div class="col-lg-6 fx-animate" data-delay="120">
+                <?php $mapsUrl = get_setting('google_maps_embed', ''); ?>
+                <?php if ($mapsUrl): ?>
+                    <iframe
+                        src="<?= e($mapsUrl) ?>"
+                        width="100%" height="500"
+                        style="border:0;border-radius:1rem;" allowfullscreen=""
+                        loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                <?php else: ?>
+                    <div class="bg-light rounded-4 d-flex align-items-center justify-content-center" style="height:500px;">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-map fs-1 mb-3 d-block"></i>
+                            <p class="small">Google Maps haritası admin panelinden<br>
+                               <a href="admin/settings.php" class="text-reset fw-semibold">Genel Ayarlar</a>'dan eklenebilir.</p>
+                        </div>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
+
+        <?php endif; ?>
     </div>
 </section>
 

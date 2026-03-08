@@ -83,6 +83,16 @@ require_admin_login();
                 <a href="profile.php" class="nav-link py-2 px-2 <?= basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'active' : '' ?>">
                     <i class="bi bi-person-lock me-2"></i>Profil / Şifre
                 </a>
+                <a href="submissions.php" class="nav-link py-2 px-2 <?= basename($_SERVER['PHP_SELF']) === 'submissions.php' ? 'active' : '' ?>">
+                    <i class="bi bi-chat-left-dots me-2"></i>Gelen Mesajlar
+                    <?php
+                    try {
+                        $pdo2 = db();
+                        $unread = (int)$pdo2->query('SELECT COUNT(*) FROM contact_submissions WHERE is_read = 0')->fetchColumn();
+                        if ($unread > 0) echo '<span class="badge bg-danger ms-1 small">' . $unread . '</span>';
+                    } catch (Throwable $e) {}
+                    ?>
+                </a>
                 <hr class="border-secondary my-1">
                 <a href="health.php" class="nav-link py-2 px-2 <?= basename($_SERVER['PHP_SELF']) === 'health.php' ? 'active' : '' ?>">
                     <i class="bi bi-heart-pulse me-2"></i>Sağlık Kontrolü

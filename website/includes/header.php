@@ -35,7 +35,9 @@ $menu        = get_main_menu();
                 <?php if ($logoPath): ?>
                     <img src="<?= e($logoPath) ?>" alt="<?= e($siteTitle) ?>" height="<?= $logoHeight ?>" class="me-2">
                 <?php endif; ?>
+                <?php if (get_setting('show_header_title', '1') === '1'): ?>
                 <span class="fx-header-logo">FLEXION</span>
+                <?php endif; ?>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
                 <span class="navbar-toggler-icon"></span>

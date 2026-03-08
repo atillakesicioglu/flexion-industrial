@@ -1,0 +1,31 @@
+Options -Indexes
+
+# ---- Temiz URL'ler: /hakkimizda → /page.php?slug=hakkimizda ----
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Gerçek dosya veya dizin ise dokunma
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # PHP dosyaları zaten direkt çalışıyor
+    RewriteCond %{REQUEST_URI} !\.php$
+
+    # assets/, admin/, includes/ gibi alt dizinleri yok say
+    RewriteCond %{REQUEST_URI} !^/admin/
+    RewriteCond %{REQUEST_URI} !^/includes/
+    RewriteCond %{REQUEST_URI} !^/assets/
+
+    # /slug  →  page.php?slug=slug
+    RewriteRule ^([a-z0-9][a-z0-9\-]*)/?$ page.php?slug=$1 [L,QSA]
+</IfModule>
+
+# ---- Güvenlik başlıkları ----
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ---- PHP dosyalarında hata gösterme (production) ----
+php_flag display_errors Off

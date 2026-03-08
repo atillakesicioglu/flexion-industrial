@@ -14,12 +14,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Güvenlik doğrulaması başarısız.';
     } else {
             if (isset($_POST['save_page'])) {
-            $id         = isset($_POST['id']) ? (int) $_POST['id'] : 0;
-            $slug       = trim($_POST['slug'] ?? '');
-            $title      = trim($_POST['title'] ?? '');
-            $content    = $_POST['content'] ?? '';
-            $metaDesc   = trim($_POST['meta_description'] ?? '');
-            $isActive   = isset($_POST['is_active']) ? 1 : 0;
+            $id              = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+            $slug            = trim($_POST['slug'] ?? '');
+            $title           = trim($_POST['title'] ?? '');
+            $content         = $_POST['content'] ?? '';
+            $metaDesc        = trim($_POST['meta_description'] ?? '');
+            $isActive        = isset($_POST['is_active']) ? 1 : 0;
+            $bannerOpacity   = max(0, min(100, (int) ($_POST['banner_opacity'] ?? 50)));
+            $bannerBlur      = max(0, min(20,  (int) ($_POST['banner_blur'] ?? 0)));
+            $bannerTitleColor= trim($_POST['banner_title_color'] ?? '#ffffff');
+            $bannerTitleSize = trim($_POST['banner_title_size'] ?? '2rem');
+            $bannerTitlePos  = in_array($_POST['banner_title_position'] ?? 'center', ['left','center','right']) ? $_POST['banner_title_position'] : 'center';
 
             // Slug doğrulaması
             $slug = preg_replace('/[^a-z0-9\-]/', '', mb_strtolower($slug, 'UTF-8'));
@@ -54,38 +59,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
 
                         if (!$error) {
+                            $bannerTitle = trim($_POST['banner_title'] ?? '');
                             if ($id > 0) {
-                                if ($bannerImage !== null) {
-                                    $stmt = $pdo->prepare('UPDATE pages SET slug = :slug, title = :title, content = :content, meta_description = :meta, banner_image = :bimg, banner_title = :btitle, is_active = :active WHERE id = :id');
-                                } else {
-                                    $stmt = $pdo->prepare('UPDATE pages SET slug = :slug, title = :title, content = :content, meta_description = :meta, banner_title = :btitle, is_active = :active WHERE id = :id');
-                                }
+                                $imgSql = $bannerImage !== null ? ', banner_image = :bimg' : '';
+                                $stmt = $pdo->prepare("UPDATE pages SET slug=:slug, title=:title, content=:content,
+                                    meta_description=:meta, banner_title=:btitle{$imgSql},
+                                    banner_opacity=:bopacity, banner_blur=:bblur,
+                                    banner_title_color=:btcolor, banner_title_size=:btsize,
+                                    banner_title_position=:btpos, is_active=:active WHERE id=:id");
                                 $params = [
-                                    ':slug'   => $slug,
-                                    ':title'  => $title,
-                                    ':content'=> $content,
-                                    ':meta'   => $metaDesc,
-                                    ':btitle' => trim($_POST['banner_title'] ?? ''),
-                                    ':active' => $isActive,
-                                    ':id'     => $id,
+                                    ':slug'     => $slug,   ':title'    => $title,
+                                    ':content'  => $content,':meta'     => $metaDesc,
+                                    ':btitle'   => $bannerTitle,
+                                    ':bopacity' => $bannerOpacity, ':bblur'   => $bannerBlur,
+                                    ':btcolor'  => $bannerTitleColor,
+                                    ':btsize'   => $bannerTitleSize,
+                                    ':btpos'    => $bannerTitlePos,
+                                    ':active'   => $isActive, ':id'     => $id,
                                 ];
-                                if ($bannerImage !== null) {
-                                    $params[':bimg'] = $bannerImage;
-                                }
+                                if ($bannerImage !== null) $params[':bimg'] = $bannerImage;
                                 $stmt->execute($params);
                                 $success = 'Sayfa güncellendi.';
                             } else {
-                                $sort   = (int) $pdo->query('SELECT IFNULL(MAX(sort_order),0)+1 FROM pages')->fetchColumn();
-                                $stmt   = $pdo->prepare('INSERT INTO pages (slug, title, content, meta_description, banner_image, banner_title, is_active, sort_order) VALUES (:slug, :title, :content, :meta, :bimg, :btitle, :active, :sort)');
+                                $sort = (int) $pdo->query('SELECT IFNULL(MAX(sort_order),0)+1 FROM pages')->fetchColumn();
+                                $stmt = $pdo->prepare('INSERT INTO pages
+                                    (slug,title,content,meta_description,banner_image,banner_title,
+                                     banner_opacity,banner_blur,banner_title_color,banner_title_size,
+                                     banner_title_position,is_active,sort_order)
+                                    VALUES(:slug,:title,:content,:meta,:bimg,:btitle,
+                                           :bopacity,:bblur,:btcolor,:btsize,:btpos,:active,:sort)');
                                 $stmt->execute([
-                                    ':slug'   => $slug,
-                                    ':title'  => $title,
-                                    ':content'=> $content,
-                                    ':meta'   => $metaDesc,
-                                    ':bimg'   => $bannerImage,
-                                    ':btitle' => trim($_POST['banner_title'] ?? ''),
-                                    ':active' => $isActive,
-                                    ':sort'   => $sort,
+                                    ':slug'     => $slug,    ':title'   => $title,
+                                    ':content'  => $content, ':meta'    => $metaDesc,
+                                    ':bimg'     => $bannerImage,
+                                    ':btitle'   => $bannerTitle,
+                                    ':bopacity' => $bannerOpacity, ':bblur'   => $bannerBlur,
+                                    ':btcolor'  => $bannerTitleColor,
+                                    ':btsize'   => $bannerTitleSize,
+                                    ':btpos'    => $bannerTitlePos,
+                                    ':active'   => $isActive, ':sort'   => $sort,
                                 ]);
                                 $success = 'Sayfa eklendi.';
                             }
@@ -174,7 +186,7 @@ include __DIR__ . '/partials_header.php';
                                     <div>
                                         <div><?= e($page['title']) ?></div>
                                         <div class="small text-muted">
-                                            /page.php?slug=<?= e($page['slug']) ?>
+                                            /<?= e($page['slug']) ?>
                                             <?php if (!(bool)$page['is_active']): ?>
                                                 &nbsp;<span class="badge bg-secondary-subtle text-secondary border small">Pasif</span>
                                             <?php endif; ?>
@@ -230,7 +242,10 @@ include __DIR__ . '/partials_header.php';
                         <input type="text" name="slug" class="form-control" required
                                value="<?= e($editPage['slug'] ?? '') ?>"
                                placeholder="hakkimizda, iletisim, kariyer...">
-                        <div class="form-text">URL'de kullanılır. Sadece a-z, 0-9 ve - içerebilir.</div>
+                        <div class="form-text">
+                            Temiz URL: <code>/<?= e($editPage['slug'] ?? 'slug') ?></code>
+                            &nbsp;(Sadece a-z, 0-9 ve - içerebilir)
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -255,6 +270,44 @@ include __DIR__ . '/partials_header.php';
                         <input type="text" name="banner_title" class="form-control"
                                value="<?= e($editPage['banner_title'] ?? '') ?>">
                         <div class="form-text">Banner üzerinde büyük başlık olarak gösterilir (boş bırakılabilir).</div>
+                    </div>
+
+                    <?php $bOpacity = (int)($editPage['banner_opacity'] ?? 50);
+                          $bBlur    = (int)($editPage['banner_blur'] ?? 0); ?>
+                    <div class="mb-3">
+                        <label class="form-label">Banner Opaklık (Karartma) <span class="badge bg-secondary" id="bopacity_val"><?= $bOpacity ?>%</span></label>
+                        <input type="range" name="banner_opacity" class="form-range"
+                               min="0" max="100" value="<?= $bOpacity ?>"
+                               oninput="document.getElementById('bopacity_val').textContent=this.value+'%'">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Banner Bulanıklık (Blur) <span class="badge bg-secondary" id="bblur_val"><?= $bBlur ?>px</span></label>
+                        <input type="range" name="banner_blur" class="form-range"
+                               min="0" max="20" value="<?= $bBlur ?>"
+                               oninput="document.getElementById('bblur_val').textContent=this.value+'px'">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <label class="form-label form-label-sm">Yazı Rengi</label>
+                            <input type="color" name="banner_title_color" class="form-control form-control-color w-100"
+                                   value="<?= e($editPage['banner_title_color'] ?? '#ffffff') ?>">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label form-label-sm">Yazı Boyutu</label>
+                            <select name="banner_title_size" class="form-select form-select-sm">
+                                <?php foreach (['1.25rem'=>'Küçük','1.75rem'=>'Orta','2rem'=>'Normal','2.5rem'=>'Büyük','3rem'=>'Çok Büyük'] as $v=>$l): ?>
+                                    <option value="<?= $v ?>" <?= ($editPage['banner_title_size'] ?? '2rem') === $v ? 'selected' : '' ?>><?= $l ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label form-label-sm">Yazı Konumu</label>
+                            <select name="banner_title_position" class="form-select form-select-sm">
+                                <option value="left"   <?= ($editPage['banner_title_position'] ?? 'center') === 'left'   ? 'selected' : '' ?>>Sol</option>
+                                <option value="center" <?= ($editPage['banner_title_position'] ?? 'center') === 'center' ? 'selected' : '' ?>>Orta</option>
+                                <option value="right"  <?= ($editPage['banner_title_position'] ?? 'center') === 'right'  ? 'selected' : '' ?>>Sağ</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-3">

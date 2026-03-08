@@ -1,16 +1,4 @@
 <?php
-// ---- Hata yakalama: PHP fatal hataları log dosyasına yaz ----
-register_shutdown_function(function () {
-    $err = error_get_last();
-    if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
-        $msg = date('[Y-m-d H:i:s] ') . 'FATAL(' . $err['type'] . '): '
-             . $err['message'] . ' in ' . $err['file'] . ':' . $err['line'] . PHP_EOL;
-        @file_put_contents(__DIR__ . '/flexion_errors.log', $msg, FILE_APPEND | LOCK_EX);
-    }
-});
-@ini_set('log_errors', 1);
-@ini_set('error_log', __DIR__ . '/flexion_errors.log');
-
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/upload_helper.php';
 
@@ -685,6 +673,7 @@ include __DIR__ . '/partials_header.php';
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <?php if (isset($editProduct) && $editProduct): ?>
 <div class="row">

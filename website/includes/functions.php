@@ -151,7 +151,7 @@ function get_main_menu(): array
 }
 
 /**
- * Aktif kategorileri (üst seviye) getirir. Tablo yoksa boş dizi döner.
+ * Tüm aktif kategorileri düz liste olarak getirir.
  */
 function get_active_categories(): array
 {
@@ -162,6 +162,50 @@ function get_active_categories(): array
     } catch (Throwable $e) {
         return [];
     }
+}
+
+/**
+ * Kategorileri hiyerarşik ağaç olarak getirir.
+ * Üst seviye kategoriler + her birinin 'children' dizisi (alt kategoriler).
+ * parent_id kolonu yoksa düz liste döner (fallback).
+ */
+function get_categories_tree(): array
+{
+    try {
+        $pdo  = db();
+        $stmt = $pdo->query('SELECT * FROM categories WHERE is_active = 1 ORDER BY sort_order ASC, name ASC');
+        $all  = $stmt->fetchAll();
+    } catch (Throwable $e) {
+        return [];
+    }
+
+    $parents  = [];
+    $children = [];
+
+    foreach ($all as $cat) {
+        $cat['children'] = [];
+        $pid = isset($cat['parent_id']) ? (int)$cat['parent_id'] : 0;
+        if ($pid === 0) {
+            $parents[$cat['id']] = $cat;
+        } else {
+            $children[$pid][] = $cat;
+        }
+    }
+
+    // parent_id kolonu hiç yoksa (eski şema) düz liste döndür
+    if (empty($parents) && !empty($all)) {
+        foreach ($all as $cat) {
+            $cat['children'] = [];
+            $parents[$cat['id']] = $cat;
+        }
+    }
+
+    foreach ($parents as $id => &$parent) {
+        $parent['children'] = $children[$id] ?? [];
+    }
+    unset($parent);
+
+    return array_values($parents);
 }
 
 /**

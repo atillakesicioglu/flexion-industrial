@@ -2,19 +2,7 @@
 
 require_once __DIR__ . '/includes/header.php';
 
-$categories = get_active_categories();
-
-// Sidebar accordion için tüm kategorilerin ürünleri
-$sidebarProducts = [];
-try {
-    $pdo    = db();
-    $spStmt = $pdo->query('SELECT id, name, category_id FROM products WHERE is_active = 1 ORDER BY category_id, sort_order ASC, id ASC');
-    foreach ($spStmt->fetchAll() as $sp) {
-        $sidebarProducts[$sp['category_id']][] = $sp;
-    }
-} catch (Throwable $e) {
-    $sidebarProducts = [];
-}
+$categoriesTree = get_categories_tree();
 ?>
 
 <section class="py-5">
@@ -23,14 +11,13 @@ try {
             <aside class="col-lg-3 mb-4 mb-lg-0">
                 <h2 class="h6 text-uppercase text-muted mb-3">Sektörler</h2>
                 <div class="fx-cat-accordion">
-                    <?php foreach ($categories as $cat):
-                        $cid      = (int)$cat['id'];
-                        $catProds = $sidebarProducts[$cid] ?? [];
-                        $hasProds = !empty($catProds);
-                        $accId    = 'fx-cat-' . $cid;
+                    <?php foreach ($categoriesTree as $cat):
+                        $cid        = (int)$cat['id'];
+                        $hasChildren = !empty($cat['children']);
+                        $accId       = 'fx-cat-' . $cid;
                     ?>
                     <div class="fx-cat-item">
-                        <?php if ($hasProds): ?>
+                        <?php if ($hasChildren): ?>
                             <button class="fx-cat-btn"
                                     type="button"
                                     data-bs-toggle="collapse"
@@ -42,9 +29,9 @@ try {
                             </button>
                             <div class="collapse" id="<?= $accId ?>">
                                 <div class="fx-cat-children">
-                                    <?php foreach ($catProds as $pr): ?>
-                                        <a href="product.php?id=<?= (int)$pr['id'] ?>"
-                                           class="fx-cat-child-link"><?= e($pr['name']) ?></a>
+                                    <?php foreach ($cat['children'] as $child): ?>
+                                        <a href="category.php?id=<?= (int)$child['id'] ?>"
+                                           class="fx-cat-child-link"><?= e($child['name']) ?></a>
                                     <?php endforeach; ?>
                                     <a href="category.php?id=<?= $cid ?>"
                                        class="fx-cat-child-link fx-cat-all-link">

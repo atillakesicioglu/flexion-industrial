@@ -211,7 +211,7 @@ a.text-dark:hover { color: var(--flexion-red) !important; }
 /* ── Dropdown menü stili (referans görsele uygun) ── */
 .fx-main-nav .fx-dd {
     border: none;
-    border-top: 2px solid var(--flexion-red);
+    /* border-top KALDIRILDI: active dropdown-toggle box-shadow ile çakışıp çift çizgi yapıyordu */
     box-shadow: 0 12px 36px rgba(0,0,0,.12);
     border-radius: 0 0 .5rem .5rem;
     padding: 1rem 0;
@@ -402,11 +402,7 @@ div.fx-card-img {
     vertical-align: middle;
 }
 
-/* Son satır alt çizgisi */
-.product-spec-table tbody tr:last-child td,
-.product-description table tbody tr:last-child td {
-    border-bottom: 2px solid var(--flexion-red);
-}
+/* Son satır alt çizgisi — KALDIRILDI (kullanıcı isteği: sadece üst kırmızı çizgi olsun) */
 
 /* İlk sütun kalın — özellik adı */
 .product-spec-table td:first-child,
@@ -533,6 +529,18 @@ div.fx-card-img {
 }
 
 /* Alt öğeler (ürün linkleri) */
+/* Accordion slide-down animasyonu */
+.fx-cat-accordion .collapsing {
+    transition: height 0.32s ease !important;
+}
+.fx-cat-accordion .collapse.show .fx-cat-children {
+    animation: fx-slide-down 0.32s ease both;
+}
+@keyframes fx-slide-down {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 .fx-cat-children {
     padding: .2rem .5rem .7rem 1rem;
     display: flex;

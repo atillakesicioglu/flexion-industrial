@@ -217,7 +217,14 @@ try {
                 <?php endif; ?>
 
                 <?php if (!empty($product['short_description'])): ?>
-                    <p class="mb-4 text-secondary"><?= e($product['short_description']) ?></p>
+                    <p class="mb-3 text-secondary"><?= e($product['short_description']) ?></p>
+                <?php endif; ?>
+
+                <!-- Uzun açıklama: kısa açıklama ile butonlar arasında (referans görseli gibi) -->
+                <?php if (!empty($product['description'])): ?>
+                    <div class="product-description mb-4">
+                        <?= $product['description'] ?>
+                    </div>
                 <?php endif; ?>
 
                 <!-- Doküman Butonları (referans: Technical sheet ↓, Other documents ↓) -->
@@ -240,17 +247,6 @@ try {
                 </button>
             </div>
         </div>
-
-        <!-- Ürün Açıklaması -->
-        <?php if (!empty($product['description'])): ?>
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="product-description">
-                    <?= $product['description'] ?>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
 
         <!-- Teknik Özellikler Tabloları -->
         <?php if ($specTables): ?>

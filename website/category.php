@@ -32,18 +32,7 @@ if (!$category) {
     exit;
 }
 
-$categories = get_active_categories();
-
-// Sidebar accordion için tüm kategorilerin ürünleri (tek sorguda)
-$sidebarProducts = [];
-try {
-    $spStmt = $pdo->query('SELECT id, name, category_id FROM products WHERE is_active = 1 ORDER BY category_id, sort_order ASC, id ASC');
-    foreach ($spStmt->fetchAll() as $sp) {
-        $sidebarProducts[$sp['category_id']][] = $sp;
-    }
-} catch (Throwable $e) {
-    $sidebarProducts = [];
-}
+$categoriesTree = get_categories_tree();
 
 $orderSql = 'ORDER BY sort_order ASC, name ASC';
 if ($sort === 'az') {
@@ -88,15 +77,20 @@ try {
             <aside class="col-lg-3 mb-4 mb-lg-0">
                 <h2 class="h6 text-uppercase text-muted mb-3">Sektörler</h2>
                 <div class="fx-cat-accordion">
-                    <?php foreach ($categories as $cat):
-                        $cid      = (int)$cat['id'];
-                        $isOpen   = ($cid === $categoryId);
-                        $catProds = $sidebarProducts[$cid] ?? [];
-                        $hasProds = !empty($catProds);
-                        $accId    = 'fx-cat-' . $cid;
+                    <?php foreach ($categoriesTree as $cat):
+                        $cid         = (int)$cat['id'];
+                        $hasChildren = !empty($cat['children']);
+                        $accId       = 'fx-cat-' . $cid;
+                        // Aktif: bu kategori seçili VEYA seçili kategori bu kategorinin çocuğu
+                        $isOpen = ($cid === $categoryId);
+                        if (!$isOpen && $hasChildren) {
+                            foreach ($cat['children'] as $ch) {
+                                if ((int)$ch['id'] === $categoryId) { $isOpen = true; break; }
+                            }
+                        }
                     ?>
                     <div class="fx-cat-item">
-                        <?php if ($hasProds): ?>
+                        <?php if ($hasChildren): ?>
                             <button class="fx-cat-btn<?= $isOpen ? ' fx-cat-active' : '' ?>"
                                     type="button"
                                     data-bs-toggle="collapse"
@@ -108,9 +102,11 @@ try {
                             </button>
                             <div class="collapse<?= $isOpen ? ' show' : '' ?>" id="<?= $accId ?>">
                                 <div class="fx-cat-children">
-                                    <?php foreach ($catProds as $pr): ?>
-                                        <a href="product.php?id=<?= (int)$pr['id'] ?>"
-                                           class="fx-cat-child-link"><?= e($pr['name']) ?></a>
+                                    <?php foreach ($cat['children'] as $child): ?>
+                                        <a href="category.php?id=<?= (int)$child['id'] ?>"
+                                           class="fx-cat-child-link<?= (int)$child['id'] === $categoryId ? ' fw-semibold' : '' ?>">
+                                            <?= e($child['name']) ?>
+                                        </a>
                                     <?php endforeach; ?>
                                     <a href="category.php?id=<?= $cid ?>"
                                        class="fx-cat-child-link fx-cat-all-link">

@@ -79,7 +79,9 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
         <?php if ($slug !== 'iletisim'): ?>
         <div class="row justify-content-center">
             <div class="col-lg-8 fx-animate">
+                <?php if (!$bannerImg): /* Banner yoksa başlığı içerikte göster */ ?>
                 <h1 class="h2 mb-4"><?= e($page['title']) ?></h1>
+                <?php endif; ?>
                 <div class="page-content">
                     <?= $page['content'] ?>
                 </div>
@@ -93,7 +95,9 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
         <div class="row g-5">
             <!-- Sol: Form + bilgiler -->
             <div class="col-lg-6 fx-animate">
+                <?php if (!$bannerImg): /* Banner yoksa başlığı içerikte göster */ ?>
                 <h1 class="h2 mb-4"><?= e($page['title']) ?></h1>
+                <?php endif; ?>
                 <?php if ($page['content']): ?>
                     <div class="page-content mb-4"><?= $page['content'] ?></div>
                 <?php endif; ?>
@@ -240,14 +244,25 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
 
             <!-- Sağ: Google Maps -->
             <div class="col-lg-6 fx-animate" data-delay="120">
-                <?php $mapsUrl = get_setting('google_maps_embed', ''); ?>
-                <?php if ($mapsUrl): ?>
-                    <iframe
-                        src="<?= e($mapsUrl) ?>"
-                        width="100%" height="500"
-                        style="border:0;border-radius:1rem;" allowfullscreen=""
-                        loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
+                <?php $mapsEmbed = get_setting('google_maps_embed', ''); ?>
+                <?php if ($mapsEmbed): ?>
+                    <div style="border-radius:1rem;overflow:hidden;height:500px;">
+                    <?php if (stripos(trim($mapsEmbed), '<iframe') === 0): ?>
+                        <?php
+                        // Tam iframe HTML olarak kaydedilmiş → width/height override edip doğrudan render
+                        $mapsEmbed = preg_replace('/width="[^"]*"/', 'width="100%"', $mapsEmbed);
+                        $mapsEmbed = preg_replace('/height="[^"]*"/', 'height="500"', $mapsEmbed);
+                        $mapsEmbed = preg_replace('/style="[^"]*"/', 'style="border:0;width:100%;height:500px;"', $mapsEmbed);
+                        echo $mapsEmbed;
+                        ?>
+                    <?php else: ?>
+                        <iframe src="<?= e($mapsEmbed) ?>"
+                                width="100%" height="500"
+                                style="border:0;" allowfullscreen=""
+                                loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    <?php endif; ?>
+                    </div>
                 <?php else: ?>
                     <div class="bg-light rounded-4 d-flex align-items-center justify-content-center" style="height:500px;">
                         <div class="text-center text-muted">

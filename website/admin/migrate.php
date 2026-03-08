@@ -205,6 +205,7 @@ $columnMigrations = [
     // categories
     ['table' => 'categories', 'column' => 'is_active',          'sql' => 'ALTER TABLE `categories` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1'],
     ['table' => 'categories', 'column' => 'sort_order',         'sql' => 'ALTER TABLE `categories` ADD COLUMN `sort_order` INT NOT NULL DEFAULT 0'],
+    ['table' => 'categories', 'column' => 'parent_id',          'sql' => 'ALTER TABLE `categories` ADD COLUMN `parent_id` INT UNSIGNED NULL DEFAULT NULL'],
     // news
     ['table' => 'news',       'column' => 'is_active',          'sql' => 'ALTER TABLE `news` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1'],
     // home_sections

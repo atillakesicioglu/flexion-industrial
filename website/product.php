@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['inquiry_submit'])) {
             @mail($toMail, $subj, $body, "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com'));
         }
         // PRG redirect → sayfayı yenileme double-submit yapmaz, 500 hatası ortadan kalkar
-        header('Location: product.php?id=' . $productId . '&sent=1');
+        header('Location: product?id=' . $productId . '&sent=1');
         exit;
     }
 }
@@ -73,7 +73,7 @@ if (!$product) {
     <div class="container py-5">
         <h1 class="h3 mb-3">Ürün bulunamadı</h1>
         <p class="text-muted">Aradığınız ürün sistemde yer almıyor veya pasif durumda.</p>
-        <a href="sectors.php" class="btn btn-outline-secondary btn-sm">Ürünlere dön</a>
+        <a href="sectors" class="btn btn-outline-secondary btn-sm">Ürünlere dön</a>
     </div>
     <?php
     require_once __DIR__ . '/includes/footer.php';
@@ -137,10 +137,10 @@ try {
         <!-- Breadcrumb -->
         <nav class="mb-4" aria-label="breadcrumb">
             <ol class="breadcrumb small">
-                <li class="breadcrumb-item"><a href="index.php">Ana Sayfa</a></li>
-                <li class="breadcrumb-item"><a href="sectors.php">Ürünler</a></li>
+                <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a href="sectors">Ürünler</a></li>
                 <li class="breadcrumb-item">
-                    <a href="category.php?id=<?= e((string)$product['category_id']) ?>"><?= e($product['category_name']) ?></a>
+                    <a href="category?id=<?= e((string)$product['category_id']) ?>"><?= e($product['category_name']) ?></a>
                 </li>
                 <li class="breadcrumb-item active" aria-current="page"><?= e($product['name']) ?></li>
             </ol>
@@ -206,7 +206,7 @@ try {
 
                 <!-- Kategori yolu (referans: / Food /) -->
                 <p class="small text-muted mb-1">
-                    / <a href="category.php?id=<?= e((string)$product['category_id']) ?>"
+                    / <a href="category?id=<?= e((string)$product['category_id']) ?>"
                          class="text-muted text-decoration-none"><?= e($product['category_name']) ?></a> /
                 </p>
 
@@ -292,7 +292,7 @@ try {
             </div>
             <?php foreach ($relatedProducts as $rp): ?>
                 <div class="col-md-4 fx-animate">
-                    <a href="product.php?id=<?= e((string) $rp['id']) ?>"
+                    <a href="product?id=<?= e((string) $rp['id']) ?>"
                        class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                         <?php if (!empty($rp['main_image'])): ?>
                             <img src="<?= e($rp['main_image']) ?>" class="card-img-top fx-card-img" alt="<?= e($rp['name']) ?>">

@@ -40,7 +40,7 @@ foreach ($footerLinksRaw as $fl) {
             <!-- Şirket bilgisi -->
             <div class="col-md-4 col-lg-3">
                 <?php if ($logoPath): ?>
-                    <a href="index.php" class="d-inline-block mb-3">
+                    <a href="/" class="d-inline-block mb-3">
                         <img src="<?= e($logoPath) ?>" alt="<?= e($siteTitle) ?>"
                              height="<?= $logoHeight ?>" style="max-height:<?= $logoHeight ?>px;filter:brightness(0) invert(1);">
                     </a>
@@ -81,15 +81,15 @@ foreach ($footerLinksRaw as $fl) {
                 <div class="col-6 col-md-2 col-lg-2">
                     <h6 class="text-white mb-3 fw-semibold">Kurumsal</h6>
                     <ul class="list-unstyled small">
-                        <li class="mb-1"><a href="page.php?slug=hakkimizda">Hakkımızda</a></li>
-                        <li class="mb-1"><a href="page.php?slug=iletisim">İletişim</a></li>
+                        <li class="mb-1"><a href="/hakkimizda">Hakkımızda</a></li>
+                        <li class="mb-1"><a href="/iletisim">İletişim</a></li>
                     </ul>
                 </div>
                 <div class="col-6 col-md-2 col-lg-2">
                     <h6 class="text-white mb-3 fw-semibold">Ürünler</h6>
                     <ul class="list-unstyled small">
-                        <li class="mb-1"><a href="sectors.php">Tüm Ürünler</a></li>
-                        <li class="mb-1"><a href="news.php">Haberler</a></li>
+                        <li class="mb-1"><a href="/sectors">Tüm Ürünler</a></li>
+                        <li class="mb-1"><a href="/news">Haberler</a></li>
                     </ul>
                 </div>
             <?php endif; ?>
@@ -125,6 +125,19 @@ foreach ($footerLinksRaw as $fl) {
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Desktop (≥992px): hover ile dropdown aç/kapat
+(function () {
+    if (window.innerWidth < 992) return;
+    document.querySelectorAll('.fx-main-nav .dropdown').forEach(function (el) {
+        var toggle = el.querySelector('[data-bs-toggle="dropdown"]');
+        if (!toggle) return;
+        var dd = bootstrap.Dropdown.getOrCreateInstance(toggle);
+        el.addEventListener('mouseenter', function () { dd.show(); });
+        el.addEventListener('mouseleave', function () { dd.hide(); });
+    });
+}());
+</script>
 <script>
 // Scroll tabanlı animasyon
 (function () {

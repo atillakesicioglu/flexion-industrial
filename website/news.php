@@ -20,7 +20,7 @@ if ($slug) {
         <div class="container py-5">
             <h1 class="h3 mb-3">Haber bulunamadı</h1>
             <p class="text-muted">Aradığınız içerik sistemde yer almıyor veya pasif durumda.</p>
-            <a href="news.php" class="btn btn-outline-secondary btn-sm">Tüm haberlere dön</a>
+            <a href="news" class="btn btn-outline-secondary btn-sm">Tüm haberlere dön</a>
         </div>
         <?php
         require_once __DIR__ . '/includes/footer.php';
@@ -82,7 +82,7 @@ if ($slug) {
                         } catch (Throwable $e) {}
                         foreach ($sideNews as $n): ?>
                             <li class="mb-2">
-                                <a href="news.php?slug=<?= e($n['slug']) ?>" class="text-decoration-none">
+                                <a href="news?slug=<?= e($n['slug']) ?>" class="text-decoration-none">
                                     <?= e($n['title']) ?>
                                 </a>
                             </li>
@@ -142,7 +142,7 @@ if ($bannerImg): ?>
         <div class="row g-3">
             <?php foreach ($items as $news): ?>
                 <div class="col-md-4 fx-animate">
-                    <a href="news.php?slug=<?= e($news['slug']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
+                    <a href="news?slug=<?= e($news['slug']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                         <?php if (!empty($news['image'])): ?>
                             <img src="<?= e($news['image']) ?>" class="card-img-top fx-card-img" alt="<?= e($news['title']) ?>">
                         <?php else: ?>

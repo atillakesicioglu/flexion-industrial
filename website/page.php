@@ -1,21 +1,85 @@
 <?php
-
-require_once __DIR__ . '/includes/header.php';
+// ════════════════════════════════════════════════════════════════════
+//  FORM İŞLEME — HTML output'tan ÖNCE (PRG pattern)
+// ════════════════════════════════════════════════════════════════════
+require_once __DIR__ . '/includes/functions.php';
 
 $pdo = db();
 
-// Slug: önce ?slug=, yoksa temiz URL path'inden al
+// Slug tespiti (GET veya temiz URL path'inden)
 $slug = trim($_GET['slug'] ?? '');
 if (!$slug) {
-    // /hakkimizda → hakkimizda
     $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
     $slug = trim(basename($path), '/');
-    // Bilinen PHP dosyaları ve dizinleri pas geç
     if (pathinfo($slug, PATHINFO_EXTENSION)) {
         $slug = '';
     }
 }
 
+// Sayfa verisini erkenden çek (form işleme ve redirect için gerekli)
+$page = null;
+if ($slug) {
+    try {
+        $stmt = $pdo->prepare('SELECT * FROM pages WHERE slug = :slug AND is_active = 1 LIMIT 1');
+        $stmt->execute([':slug' => $slug]);
+        $page = $stmt->fetch();
+    } catch (Throwable $e) {
+        $page = null;
+    }
+}
+
+// İletişim formu PRG — başarı bayrağı GET ile taşınır
+$formSent  = isset($_GET['sent']) && $_GET['sent'] === '1';
+$formError = null;
+
+if ($page && $slug === 'iletisim'
+    && $_SERVER['REQUEST_METHOD'] === 'POST'
+    && !empty($_POST['contact_submit'])
+) {
+    $cName    = trim($_POST['contact_name']    ?? '');
+    $cSurname = trim($_POST['contact_surname'] ?? '');
+    $cEmail2  = trim($_POST['contact_email']   ?? '');
+    $cPhone2  = trim($_POST['contact_phone']   ?? '');
+    $cCompany = trim($_POST['contact_company'] ?? '');
+    $cMsg     = trim($_POST['contact_message'] ?? '');
+
+    if (!$cName || !$cEmail2 || !$cMsg) {
+        $formError = 'Lütfen zorunlu alanları doldurun (Ad, E-posta, Mesaj).';
+    } elseif (!filter_var($cEmail2, FILTER_VALIDATE_EMAIL)) {
+        $formError = 'Geçerli bir e-posta adresi girin.';
+    } else {
+        $fullName = trim($cName . ' ' . $cSurname);
+        try {
+            $ins = $pdo->prepare('INSERT INTO contact_submissions
+                (type,name,email,phone,company,message)
+                VALUES(:type,:name,:email,:phone,:company,:msg)');
+            $ins->execute([
+                ':type'    => 'contact',
+                ':name'    => $fullName,
+                ':email'   => $cEmail2,
+                ':phone'   => $cPhone2  ?: null,
+                ':company' => $cCompany ?: null,
+                ':msg'     => $cMsg,
+            ]);
+        } catch (Throwable $e2) { /* tablo yoksa sessizce geç */ }
+
+        $toMail = get_setting('contact_email', '');
+        if ($toMail) {
+            $subj = 'Flexion İletişim: ' . $fullName;
+            $body = "Ad: $fullName\nE-posta: $cEmail2\nTelefon: $cPhone2\nŞirket: $cCompany\n\nMesaj:\n$cMsg";
+            @mail($toMail, $subj, $body, "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com'));
+        }
+
+        // PRG: Yönlendir → double-submit ve 500 engeli
+        header('Location: /' . $slug . '?sent=1');
+        exit;
+    }
+}
+
+// ════ HTML çıktısı başlıyor ════════════════════════════════════════
+require_once __DIR__ . '/includes/header.php';
+
+// 404 — Slug yok
 if (!$slug) {
     http_response_code(404);
     echo '<div class="container py-5"><h1 class="h3">Sayfa bulunamadı</h1></div>';
@@ -23,28 +87,21 @@ if (!$slug) {
     exit;
 }
 
-try {
-    $stmt = $pdo->prepare('SELECT * FROM pages WHERE slug = :slug AND is_active = 1 LIMIT 1');
-    $stmt->execute([':slug' => $slug]);
-    $page = $stmt->fetch();
-} catch (Throwable $e) {
-    $page = null;
-}
-
+// 404 — DB'de sayfa yok
 if (!$page) {
     http_response_code(404);
     ?>
     <div class="container py-5">
         <h1 class="h3 mb-3">Sayfa bulunamadı</h1>
         <p class="text-muted">Aradığınız sayfa sistemde yer almıyor veya pasif durumda.</p>
-        <a href="index.php" class="btn btn-outline-secondary btn-sm">Ana sayfaya dön</a>
+        <a href="index" class="btn btn-outline-secondary btn-sm">Ana sayfaya dön</a>
     </div>
     <?php
     require_once __DIR__ . '/includes/footer.php';
     exit;
 }
 
-// ---- Banner render ----
+// ---- Banner ----
 $bannerImg   = $page['banner_image'] ?? '';
 $bannerTitle = !empty($page['banner_title']) ? $page['banner_title'] : $page['title'];
 $bOpacity    = max(0, min(100, (int)($page['banner_opacity'] ?? 50)));
@@ -53,7 +110,7 @@ $bTitleColor = $page['banner_title_color'] ?? '#ffffff';
 $bTitleSize  = $page['banner_title_size']  ?? '2rem';
 $bTitlePos   = $page['banner_title_position'] ?? 'center';
 
-$textAlignMap = ['left' => 'text-start', 'center' => 'text-center', 'right' => 'text-end'];
+$textAlignMap   = ['left' => 'text-start', 'center' => 'text-center', 'right' => 'text-end'];
 $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
 ?>
 
@@ -79,7 +136,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
         <?php if ($slug !== 'iletisim'): ?>
         <div class="row justify-content-center">
             <div class="col-lg-8 fx-animate">
-                <?php if (!$bannerImg): /* Banner yoksa başlığı içerikte göster */ ?>
+                <?php if (!$bannerImg): ?>
                 <h1 class="h2 mb-4"><?= e($page['title']) ?></h1>
                 <?php endif; ?>
                 <div class="page-content">
@@ -95,7 +152,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
         <div class="row g-5">
             <!-- Sol: Form + bilgiler -->
             <div class="col-lg-6 fx-animate">
-                <?php if (!$bannerImg): /* Banner yoksa başlığı içerikte göster */ ?>
+                <?php if (!$bannerImg): ?>
                 <h1 class="h2 mb-4"><?= e($page['title']) ?></h1>
                 <?php endif; ?>
                 <?php if ($page['content']): ?>
@@ -141,49 +198,6 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
                 </div>
 
                 <!-- Form -->
-                <?php
-                $formSent  = false;
-                $formError = null;
-                if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['contact_submit'])) {
-                    $cName    = trim($_POST['contact_name']    ?? '');
-                    $cSurname = trim($_POST['contact_surname'] ?? '');
-                    $cEmail2  = trim($_POST['contact_email']   ?? '');
-                    $cPhone2  = trim($_POST['contact_phone']   ?? '');
-                    $cCompany = trim($_POST['contact_company'] ?? '');
-                    $cMsg     = trim($_POST['contact_message'] ?? '');
-
-                    if (!$cName || !$cEmail2 || !$cMsg) {
-                        $formError = 'Lütfen zorunlu alanları doldurun (Ad, E-posta, Mesaj).';
-                    } elseif (!filter_var($cEmail2, FILTER_VALIDATE_EMAIL)) {
-                        $formError = 'Geçerli bir e-posta adresi girin.';
-                    } else {
-                        $fullName = trim($cName . ' ' . $cSurname);
-                        // DB'ye kaydet
-                        try {
-                            $ins = $pdo->prepare('INSERT INTO contact_submissions
-                                (type,name,email,phone,company,message)
-                                VALUES(:type,:name,:email,:phone,:company,:msg)');
-                            $ins->execute([
-                                ':type'    => 'contact',
-                                ':name'    => $fullName,
-                                ':email'   => $cEmail2,
-                                ':phone'   => $cPhone2  ?: null,
-                                ':company' => $cCompany ?: null,
-                                ':msg'     => $cMsg,
-                            ]);
-                        } catch (Throwable $e2) { /* tablo henüz yoksa sessizce geç */ }
-                        // E-posta da gönder (isteğe bağlı)
-                        $toMail = get_setting('contact_email', '');
-                        if ($toMail) {
-                            $subj = 'Flexion İletişim: ' . $fullName;
-                            $body = "Ad: $fullName\nE-posta: $cEmail2\nTelefon: $cPhone2\nŞirket: $cCompany\n\nMesaj:\n$cMsg";
-                            @mail($toMail, $subj, $body, "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com'));
-                        }
-                        $formSent = true;
-                    }
-                }
-                ?>
-
                 <?php if ($formSent): ?>
                 <div class="fx-success-anim text-center py-5">
                     <div class="mb-3">
@@ -191,7 +205,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
                     </div>
                     <h2 class="h4 mb-2">Mesajınız alındı!</h2>
                     <p class="text-muted">En kısa sürede size dönüş yapacağız.</p>
-                    <a href="<?= e($_SERVER['REQUEST_URI']) ?>" class="btn btn-outline-secondary btn-sm mt-2">Yeni mesaj gönder</a>
+                    <a href="/iletisim" class="btn btn-outline-secondary btn-sm mt-2">Yeni mesaj gönder</a>
                 </div>
                 <?php else: ?>
                 <div class="fx-contact-form-wrap">
@@ -249,7 +263,6 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
                     <div style="border-radius:1rem;overflow:hidden;height:500px;">
                     <?php if (stripos(trim($mapsEmbed), '<iframe') === 0): ?>
                         <?php
-                        // Tam iframe HTML olarak kaydedilmiş → width/height override edip doğrudan render
                         $mapsEmbed = preg_replace('/width="[^"]*"/', 'width="100%"', $mapsEmbed);
                         $mapsEmbed = preg_replace('/height="[^"]*"/', 'height="500"', $mapsEmbed);
                         $mapsEmbed = preg_replace('/style="[^"]*"/', 'style="border:0;width:100%;height:500px;"', $mapsEmbed);

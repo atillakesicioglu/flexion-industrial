@@ -1,22 +1,22 @@
 Options -Indexes
 
-# ---- Temiz URL'ler: /hakkimizda → /page.php?slug=hakkimizda ----
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Gerçek dosya veya dizin ise dokunma
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
+    # 1. Gerçek dosya veya dizin ise dokunma
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
 
-    # PHP dosyaları zaten direkt çalışıyor
-    RewriteCond %{REQUEST_URI} !\.php$
+    # 2. .php uzantısız talep → karşılık gelen .php dosyası varsa yönlendir
+    #    Örnek: /sectors → sectors.php, /category?id=1 → category.php?id=1
+    RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.php -f
+    RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 
-    # assets/, admin/, includes/ gibi alt dizinleri yok say
+    # 3. Kurumsal sayfa slug'ları (admin / includes / assets hariç)
     RewriteCond %{REQUEST_URI} !^/admin/
     RewriteCond %{REQUEST_URI} !^/includes/
     RewriteCond %{REQUEST_URI} !^/assets/
-
-    # /slug  →  page.php?slug=slug
     RewriteRule ^([a-z0-9][a-z0-9\-]*)/?$ page.php?slug=$1 [L,QSA]
 </IfModule>
 

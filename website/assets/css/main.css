@@ -211,25 +211,45 @@ a.text-dark:hover { color: var(--flexion-red) !important; }
 /* ── Dropdown menü stili (referans görsele uygun) ── */
 .fx-main-nav .fx-dd {
     border: none;
-    /* border-top KALDIRILDI: active dropdown-toggle box-shadow ile çakışıp çift çizgi yapıyordu */
     box-shadow: 0 12px 36px rgba(0,0,0,.12);
     border-radius: 0 0 .5rem .5rem;
     padding: 1rem 0;
     min-width: 220px;
 }
 
-/* 4+ çocuk için geniş 2 kolonlu görünüm (referans gibi) */
+/* Desktop: dropdown tam ekran genişliğinde (mega-menu efekti) */
+@media (min-width: 992px) {
+    .fx-main-nav .fx-dd {
+        position: fixed !important;
+        left: 0;
+        right: 0;
+        width: 100%;
+        border-radius: 0;
+        padding: 1.5rem 0;
+        top: auto;   /* Bootstrap'in auto konumlandırmasını sıfırla */
+        margin-top: 0 !important;
+    }
+    /* Dropdown içindeki container ile linkleri hizala */
+    .fx-main-nav .fx-dd > .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .25rem 1.5rem;
+    }
+    /* Geniş (fx-dd--wide) dropdown için 2 kolon grid */
+    .fx-main-nav .fx-dd--wide > .container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: .25rem .75rem;
+    }
+}
+
+/* 4+ çocuk için geniş görünüm (mobil fallback) */
 .fx-main-nav .fx-dd--wide {
     min-width: 380px;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    padding: 1.25rem 1rem;
-    column-gap: .5rem;
-    row-gap: 0;
 }
 
 .fx-main-nav .fx-dd .dropdown-item {
-    padding: .45rem 1rem;
+    padding: .5rem 1rem;
     font-size: .9rem;
     color: #374151;
     border-radius: 4px;
@@ -247,9 +267,12 @@ a.text-dark:hover { color: var(--flexion-red) !important; }
     font-weight: 600;
 }
 
-/* Geniş dropdown'da padding ayarı */
-.fx-main-nav .fx-dd--wide .dropdown-item {
-    padding: .5rem .75rem;
+/* ── Sticky navbar ── */
+.fx-sticky-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    box-shadow: 0 1px 6px rgba(0,0,0,.08);
 }
 
 /* ===================================================
@@ -549,7 +572,7 @@ div.fx-card-img {
 .fx-cat-child-link {
     padding: .32rem .75rem;
     font-size: .83rem;
-    color: var(--flexion-red) !important;
+    color: #374151 !important;        /* Pasif: gri */
     text-decoration: none;
     border-radius: 3px;
     transition: background-color .15s, color .15s;
@@ -557,7 +580,12 @@ div.fx-card-img {
 }
 .fx-cat-child-link:hover {
     background-color: #fef2f2;
-    color: #c0101c !important;
+    color: var(--flexion-red) !important;
+}
+/* Sadece aktif (bulunulan) kategori kırmızı */
+.fx-cat-child-link.fx-cat-child-active {
+    color: var(--flexion-red) !important;
+    font-weight: 600;
 }
 .fx-cat-child-link.fx-cat-all-link {
     color: #6b7280 !important;

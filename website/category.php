@@ -25,7 +25,7 @@ if (!$category) {
     <div class="container py-5">
         <h1 class="h3 mb-3">Kategori bulunamadı</h1>
         <p class="text-muted">Aradığınız kategori sistemde yer almıyor veya pasif durumda.</p>
-        <a href="sectors.php" class="btn btn-outline-secondary btn-sm">Tüm sektörlere dön</a>
+        <a href="sectors" class="btn btn-outline-secondary btn-sm">Tüm sektörlere dön</a>
     </div>
     <?php
     require_once __DIR__ . '/includes/footer.php';
@@ -103,19 +103,19 @@ try {
                             <div class="collapse<?= $isOpen ? ' show' : '' ?>" id="<?= $accId ?>">
                                 <div class="fx-cat-children">
                                     <?php foreach ($cat['children'] as $child): ?>
-                                        <a href="category.php?id=<?= (int)$child['id'] ?>"
-                                           class="fx-cat-child-link<?= (int)$child['id'] === $categoryId ? ' fw-semibold' : '' ?>">
+                                        <a href="category?id=<?= (int)$child['id'] ?>"
+                                           class="fx-cat-child-link<?= (int)$child['id'] === $categoryId ? ' fx-cat-child-active' : '' ?>">
                                             <?= e($child['name']) ?>
                                         </a>
                                     <?php endforeach; ?>
-                                    <a href="category.php?id=<?= $cid ?>"
+                                    <a href="category?id=<?= $cid ?>"
                                        class="fx-cat-child-link fx-cat-all-link">
                                         <i class="bi bi-grid-3x3-gap me-1"></i>Tümünü gör
                                     </a>
                                 </div>
                             </div>
                         <?php else: ?>
-                            <a href="category.php?id=<?= $cid ?>"
+                            <a href="category?id=<?= $cid ?>"
                                class="fx-cat-btn text-decoration-none<?= $isOpen ? ' fx-cat-active' : '' ?>">
                                 <span><?= e($cat['name']) ?></span>
                                 <i class="bi bi-chevron-right fx-cat-chevron" style="transform:none;"></i>
@@ -135,28 +135,25 @@ try {
                     </div>
                     <div class="d-flex flex-column align-items-end gap-2">
                         <div class="btn-group btn-group-sm" role="group" aria-label="Sıralama">
-                            <a href="category.php?id=<?= e((string)$categoryId) ?>&sort=relevance"
+                            <a href="category?id=<?= e((string)$categoryId) ?>&sort=relevance"
                                class="btn btn-outline-secondary <?= $sort === 'relevance' ? 'active' : '' ?>">
                                 Varsayılan
                             </a>
-                            <a href="category.php?id=<?= e((string)$categoryId) ?>&sort=az"
+                            <a href="category?id=<?= e((string)$categoryId) ?>&sort=az"
                                class="btn btn-outline-secondary <?= $sort === 'az' ? 'active' : '' ?>">
                                 İsim A-Z
                             </a>
-                            <a href="category.php?id=<?= e((string)$categoryId) ?>&sort=za"
+                            <a href="category?id=<?= e((string)$categoryId) ?>&sort=za"
                                class="btn btn-outline-secondary <?= $sort === 'za' ? 'active' : '' ?>">
                                 İsim Z-A
                             </a>
                         </div>
-                        <a href="sectors.php" class="btn btn-outline-secondary btn-sm">
-                            Tüm sektörler
-                        </a>
                     </div>
                 </div>
                 <div class="row g-3">
                     <?php foreach ($products as $product): ?>
                         <div class="col-md-4 fx-animate">
-                            <a href="product.php?id=<?= e((string) $product['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark overflow-hidden">
+                            <a href="product?id=<?= e((string) $product['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark overflow-hidden">
                                 <?php if (!empty($product['main_image'])): ?>
                                     <img src="<?= e($product['main_image']) ?>" class="card-img-top fx-card-img" alt="<?= e($product['name']) ?>" loading="lazy">
                                 <?php else: ?>
@@ -188,7 +185,7 @@ try {
                     <nav class="mt-4" aria-label="Sayfalama">
                         <ul class="pagination pagination-sm justify-content-center">
                             <?php
-                            $baseUrl = 'category.php?id=' . urlencode((string) $categoryId) . '&sort=' . urlencode($sort) . '&page=';
+                            $baseUrl = 'category?id=' . urlencode((string) $categoryId) . '&sort=' . urlencode($sort) . '&page=';
                             ?>
                             <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
                                 <a class="page-link" href="<?= $page <= 1 ? '#' : $baseUrl . ($page - 1) ?>">Önceki</a>

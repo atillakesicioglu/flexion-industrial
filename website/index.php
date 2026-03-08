@@ -16,7 +16,7 @@ if (empty($sections)) {
                 'eyebrow'     => 'Flexion Industrial',
                 'subtitle'    => 'Yüksek performanslı kablo çözümleri sunan Flexion, zorlu endüstriyel ortamlar için güvenilir altyapı sağlar.',
                 'button_text' => 'Ürünleri İncele',
-                'button_url'  => 'sectors.php',
+                'button_url'  => 'sectors',
             ],
         ],
         [
@@ -108,12 +108,12 @@ if (empty($sections)) {
                         <h2 class="h3 mb-1"><?= e($section['title'] ?? ($c['title'] ?? 'Uygulama Sektörleri')) ?></h2>
                         <p class="text-muted mb-0 small"><?= e($c['subtitle'] ?? '') ?></p>
                     </div>
-                    <a href="sectors.php" class="btn btn-outline-secondary btn-sm">Tüm sektörleri gör</a>
+                    <a href="sectors" class="btn btn-outline-secondary btn-sm">Tüm sektörleri gör</a>
                 </div>
                 <div class="row g-3">
                     <?php foreach ($categories as $cat): ?>
                         <div class="col-6 col-md-3">
-                            <a href="category.php?id=<?= e((string) $cat['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
+                            <a href="category?id=<?= e((string) $cat['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                                 <?php if (!empty($cat['image'])): ?>
                                     <img src="<?= e($cat['image']) ?>" class="card-img-top" style="height:140px;object-fit:cover;" alt="<?= e($cat['name']) ?>">
                                 <?php else: ?>
@@ -176,12 +176,12 @@ if (empty($sections)) {
                         <h2 class="h3 mb-1"><?= e($section['title'] ?? ($c['title'] ?? 'Güncel Haberler')) ?></h2>
                         <p class="text-muted mb-0 small"><?= e($c['subtitle'] ?? '') ?></p>
                     </div>
-                    <a href="news.php" class="btn btn-outline-secondary btn-sm">Tüm haberleri gör</a>
+                    <a href="news" class="btn btn-outline-secondary btn-sm">Tüm haberleri gör</a>
                 </div>
                 <div class="row g-3">
                     <?php foreach ($latestNews as $news): ?>
                         <div class="col-md-4">
-                            <a href="news.php?slug=<?= e($news['slug']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
+                            <a href="news?slug=<?= e($news['slug']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                                 <?php if (!empty($news['image'])): ?>
                                     <img src="<?= e($news['image']) ?>" class="card-img-top" style="height:180px;object-fit:cover;" alt="<?= e($news['title']) ?>">
                                 <?php endif; ?>

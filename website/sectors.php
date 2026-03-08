@@ -30,17 +30,17 @@ $categoriesTree = get_categories_tree();
                             <div class="collapse" id="<?= $accId ?>">
                                 <div class="fx-cat-children">
                                     <?php foreach ($cat['children'] as $child): ?>
-                                        <a href="category.php?id=<?= (int)$child['id'] ?>"
+                                        <a href="category?id=<?= (int)$child['id'] ?>"
                                            class="fx-cat-child-link"><?= e($child['name']) ?></a>
                                     <?php endforeach; ?>
-                                    <a href="category.php?id=<?= $cid ?>"
+                                    <a href="category?id=<?= $cid ?>"
                                        class="fx-cat-child-link fx-cat-all-link">
                                         <i class="bi bi-grid-3x3-gap me-1"></i>Tümünü gör
                                     </a>
                                 </div>
                             </div>
                         <?php else: ?>
-                            <a href="category.php?id=<?= $cid ?>"
+                            <a href="category?id=<?= $cid ?>"
                                class="fx-cat-btn text-decoration-none">
                                 <span><?= e($cat['name']) ?></span>
                                 <i class="bi bi-chevron-right fx-cat-chevron" style="transform:none;"></i>
@@ -62,7 +62,7 @@ $categoriesTree = get_categories_tree();
                 <div class="row g-3">
                     <?php foreach ($categories as $cat): ?>
                         <div class="col-6 col-md-4 fx-animate">
-                            <a href="category.php?id=<?= e((string) $cat['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark overflow-hidden">
+                            <a href="category?id=<?= e((string) $cat['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark overflow-hidden">
                                 <?php if (!empty($cat['image'])): ?>
                                     <img src="<?= e($cat['image']) ?>" class="card-img-top fx-card-img" alt="<?= e($cat['name']) ?>" loading="lazy">
                                 <?php else: ?>

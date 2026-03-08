@@ -43,7 +43,7 @@ if ($q !== '') {
         </div>
 
         <?php if ($q === ''): ?>
-            <form action="search.php" method="get" class="mb-4">
+            <form action="search" method="get" class="mb-4">
                 <div class="input-group">
                     <input type="search" name="q" class="form-control" placeholder="Ürün veya kategori ara...">
                     <button class="btn btn-primary" type="submit">Ara</button>
@@ -59,7 +59,7 @@ if ($q !== '') {
                 <div class="row g-3 mb-4">
                     <?php foreach ($resultsCats as $cat): ?>
                         <div class="col-md-4">
-                            <a href="category.php?id=<?= e((string) $cat['id']) ?>" class="card h-100 text-decoration-none text-dark border-0 shadow-sm">
+                            <a href="category?id=<?= e((string) $cat['id']) ?>" class="card h-100 text-decoration-none text-dark border-0 shadow-sm">
                                 <?php if (!empty($cat['image'])): ?>
                                     <img src="<?= e($cat['image']) ?>" class="card-img-top" alt="<?= e($cat['name']) ?>">
                                 <?php endif; ?>
@@ -78,7 +78,7 @@ if ($q !== '') {
                 <div class="row g-3">
                     <?php foreach ($resultsProducts as $product): ?>
                         <div class="col-md-3 col-sm-6">
-                            <a href="product.php?id=<?= e((string) $product['id']) ?>" class="card h-100 text-decoration-none text-dark border-0 shadow-sm">
+                            <a href="product?id=<?= e((string) $product['id']) ?>" class="card h-100 text-decoration-none text-dark border-0 shadow-sm">
                                 <?php if (!empty($product['main_image'])): ?>
                                     <img src="<?= e($product['main_image']) ?>" class="card-img-top" alt="<?= e($product['name']) ?>">
                                 <?php endif; ?>

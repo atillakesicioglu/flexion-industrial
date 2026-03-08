@@ -1,13 +1,16 @@
 <?php
-
-require_once __DIR__ . '/includes/header.php';
+// ════════════════════════════════════════════════════════════════════
+//  FORM İŞLEME — HTML output'tan ÖNCE (PRG pattern: 500 + double-submit engeli)
+// ════════════════════════════════════════════════════════════════════
+require_once __DIR__ . '/includes/functions.php';
 
 $pdo       = db();
 $productId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-// ---- Bilgi Al formu POST işlemi ----
-$inquirySent  = false;
+// GET ile gelen başarı bayrağı (PRG redirect sonrası)
+$inquirySent  = isset($_GET['sent']) && $_GET['sent'] === '1';
 $inquiryError = null;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['inquiry_submit'])) {
     $iName    = trim($_POST['inq_name']    ?? '');
     $iSurname = trim($_POST['inq_surname'] ?? '');
@@ -46,9 +49,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['inquiry_submit'])) {
             $body = "Ürün ID: $iPid\nAd: $fullName\nE-posta: $iEmail\nTelefon: $iPhone\nŞirket: $iCompany\nÜlke: $iCountry\n\nMesaj:\n$iMsg";
             @mail($toMail, $subj, $body, "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com'));
         }
-        $inquirySent = true;
+        // PRG redirect → sayfayı yenileme double-submit yapmaz, 500 hatası ortadan kalkar
+        header('Location: product.php?id=' . $productId . '&sent=1');
+        exit;
     }
 }
+
+// ════════ HTML çıktısı burada başlıyor ═══════════════════════════════════════
+require_once __DIR__ . '/includes/header.php';
 
 // ---- Ürün verisi ----
 try {

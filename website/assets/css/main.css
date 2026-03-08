@@ -459,17 +459,108 @@ div.fx-card-img {
     color: #9ca3af;
     padding-top: 3rem;
 }
+/* !important: a:not(.btn):... seçicisinin yüksek specificity'sini ezer */
 .fx-footer a {
-    color: #e5e7eb;
+    color: #e5e7eb !important;
     text-decoration: none;
     transition: color .2s;
 }
-.fx-footer a:hover { color: white; }
+.fx-footer a:hover { color: #ffffff !important; }
 .fx-footer-bottom {
     border-top: 1px solid #1f2937;
     margin-top: 2rem;
     padding-top: 1.5rem;
     font-size: 0.8rem;
+}
+
+/* ===================================================
+   Kategori Accordion Sidebar
+   (referans görsel: açılıp kapanır, animasyonlu)
+   =================================================== */
+.fx-cat-accordion {
+    border: 1px solid #e5e7eb;
+    border-radius: .5rem;
+    overflow: hidden;
+    background: #fff;
+}
+
+.fx-cat-item {
+    border-bottom: 1px solid #e5e7eb;
+}
+.fx-cat-item:last-child {
+    border-bottom: none;
+}
+
+/* Başlık butonu */
+.fx-cat-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: .72rem 1rem;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font-size: .88rem;
+    color: #374151;
+    cursor: pointer;
+    transition: color .2s, background-color .15s;
+    font-family: inherit;
+    text-decoration: none;
+}
+.fx-cat-btn:hover {
+    color: var(--flexion-red);
+    background-color: #fef9f9;
+}
+
+/* Aktif / açık kategori */
+.fx-cat-btn[aria-expanded="true"],
+.fx-cat-btn.fx-cat-active {
+    color: var(--flexion-red);
+    font-weight: 600;
+}
+
+/* Ok ikonu */
+.fx-cat-chevron {
+    font-size: .75rem;
+    flex-shrink: 0;
+    margin-left: .5rem;
+    transition: transform .3s ease, color .2s;
+}
+.fx-cat-btn[aria-expanded="true"] .fx-cat-chevron {
+    transform: rotate(180deg);
+    color: var(--flexion-red);
+}
+
+/* Alt öğeler (ürün linkleri) */
+.fx-cat-children {
+    padding: .2rem .5rem .7rem 1rem;
+    display: flex;
+    flex-direction: column;
+}
+.fx-cat-child-link {
+    padding: .32rem .75rem;
+    font-size: .83rem;
+    color: var(--flexion-red) !important;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: background-color .15s, color .15s;
+    line-height: 1.4;
+}
+.fx-cat-child-link:hover {
+    background-color: #fef2f2;
+    color: #c0101c !important;
+}
+.fx-cat-child-link.fx-cat-all-link {
+    color: #6b7280 !important;
+    font-size: .8rem;
+    margin-top: .25rem;
+    border-top: 1px dashed #f0f0f0;
+    padding-top: .4rem;
+}
+.fx-cat-child-link.fx-cat-all-link:hover {
+    color: var(--flexion-red) !important;
+    background-color: #fef2f2;
 }
 
 /* ===================================================

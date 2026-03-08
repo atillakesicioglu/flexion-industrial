@@ -2,11 +2,23 @@
    FLEXION INDUSTRIAL — main.css
    =================================================== */
 
-/* ---- Değişkenler ---- */
+/* ---- Değişkenler + Bootstrap 5 Override ---- */
 :root {
     --flexion-red: #e61421;
     --flexion-dark: #1f2933;
     --flexion-gray: #f5f7fa;
+
+    /* Bootstrap 5: mavi sistem → Flexion kırmızısı */
+    --bs-primary:              #e61421;
+    --bs-primary-rgb:          230, 20, 33;
+    --bs-link-color:           #e61421;
+    --bs-link-color-rgb:       230, 20, 33;
+    --bs-link-hover-color:     #c0101c;
+    --bs-link-hover-color-rgb: 192, 16, 28;
+    --bs-focus-ring-color:     rgba(230, 20, 33, 0.25);
+
+    /* Bootstrap component-level variables */
+    --bs-btn-focus-shadow-rgb: 230, 20, 33;
 }
 
 /* ---- Temel ---- */
@@ -17,51 +29,134 @@ body {
 /* ===================================================
    Bootstrap Mavi → Flexion Kırmızısı Override
    =================================================== */
+
+/* Butonlar */
 .btn-primary {
+    --bs-btn-bg:            #e61421;
+    --bs-btn-border-color:  #e61421;
+    --bs-btn-hover-bg:      #c0101c;
+    --bs-btn-hover-border-color: #c0101c;
+    --bs-btn-active-bg:     #a80e18;
+    --bs-btn-active-border-color: #a80e18;
+    --bs-btn-focus-shadow-rgb: 230, 20, 33;
     background-color: var(--flexion-red);
-    border-color: var(--flexion-red);
+    border-color:     var(--flexion-red);
     transition: background-color .2s, border-color .2s, transform .15s, box-shadow .2s;
 }
 .btn-primary:hover, .btn-primary:focus {
     background-color: #c0101c;
-    border-color: #c0101c;
+    border-color:     #c0101c;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(230, 20, 33, .3);
 }
+
 .btn-outline-primary {
-    color: var(--flexion-red);
+    --bs-btn-color:            #e61421;
+    --bs-btn-border-color:     #e61421;
+    --bs-btn-hover-bg:         #e61421;
+    --bs-btn-hover-border-color: #e61421;
+    --bs-btn-hover-color:      #fff;
+    --bs-btn-active-bg:        #c0101c;
+    --bs-btn-active-border-color: #c0101c;
+    color:        var(--flexion-red);
     border-color: var(--flexion-red);
-    transition: background-color .2s, color .2s, transform .15s;
+    transition:   background-color .2s, color .2s, transform .15s;
 }
 .btn-outline-primary:hover {
     background-color: var(--flexion-red);
-    border-color: var(--flexion-red);
+    border-color:     var(--flexion-red);
     color: #fff;
     transform: translateY(-1px);
 }
-.text-primary { color: var(--flexion-red) !important; }
+
+/* Danger rengi de Flexion kırmızısına bağla */
+.btn-danger {
+    --bs-btn-bg:           #e61421;
+    --bs-btn-border-color: #e61421;
+    background-color: var(--flexion-red);
+    border-color:     var(--flexion-red);
+}
+.btn-danger:hover {
+    background-color: #c0101c;
+    border-color:     #c0101c;
+}
+
+/* Utility */
+.text-primary  { color: var(--flexion-red) !important; }
 .bg-primary    { background-color: var(--flexion-red) !important; }
 .border-primary { border-color: var(--flexion-red) !important; }
+
+/* Link default (Bootstrap 5 kullanır --bs-link-color ama bazı yerler doğrudan color: link kullanır) */
+a:not(.btn):not(.dropdown-item):not(.navbar-brand):not(.nav-link):not(.page-link):not(.list-group-item) {
+    color: var(--flexion-red);
+}
+a:not(.btn):not(.dropdown-item):not(.navbar-brand):not(.nav-link):not(.page-link):not(.list-group-item):hover {
+    color: #c0101c;
+}
 a { transition: color .2s; }
-a:hover { color: var(--flexion-red); }
+
+/* Footer linkleri → override (kendi renk şeması var) */
+.fx-footer a,
+.fx-footer a:hover { color: inherit; }
+
+/* Text-dark / text-muted link overrides (sidebar, kartlar vb.) */
+a.text-dark:hover { color: var(--flexion-red) !important; }
 
 /* Pagination */
-.page-link { color: var(--flexion-red); transition: background-color .2s, color .2s; }
-.page-link:hover { color: #fff; background-color: var(--flexion-red); border-color: var(--flexion-red); }
+.page-link {
+    color: var(--flexion-red);
+    transition: background-color .2s, color .2s;
+}
+.page-link:hover       { color: #fff; background-color: var(--flexion-red); border-color: var(--flexion-red); }
 .page-item.active .page-link { background-color: var(--flexion-red); border-color: var(--flexion-red); }
 
 /* Form focus ring */
 .form-control:focus, .form-select:focus {
     border-color: var(--flexion-red);
-    box-shadow: 0 0 0 .2rem rgba(230, 20, 33, .2);
+    box-shadow:   0 0 0 .2rem rgba(230, 20, 33, .2);
 }
 .form-check-input:checked {
     background-color: var(--flexion-red);
-    border-color: var(--flexion-red);
+    border-color:     var(--flexion-red);
 }
 
-/* Badge */
-.bg-danger { background-color: var(--flexion-red) !important; }
+/* Badge / Alert */
+.bg-danger   { background-color: var(--flexion-red) !important; }
+.text-danger { color:            var(--flexion-red) !important; }
+
+/* List group aktif durumu */
+.list-group-item.active {
+    background-color: var(--flexion-red);
+    border-color:     var(--flexion-red);
+}
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+    color: var(--flexion-red);
+}
+
+/* Nav pills */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    background-color: var(--flexion-red);
+}
+
+/* Breadcrumb linkleri */
+.breadcrumb-item a {
+    color: var(--flexion-red);
+    text-decoration: none;
+}
+.breadcrumb-item a:hover { color: #c0101c; }
+
+/* Active nav link */
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link.show {
+    color: var(--flexion-red) !important;
+}
+
+/* Navbar toggler focus */
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 .2rem rgba(230, 20, 33, .2);
+}
 
 /* ===================================================
    Topbar & Header
@@ -78,7 +173,6 @@ a:hover { color: var(--flexion-red); }
     color: var(--flexion-red);
     transition: color .2s;
 }
-
 .navbar-brand:hover .fx-header-logo { color: #c0101c; }
 
 .fx-main-nav .nav-link {
@@ -128,7 +222,7 @@ a:hover { color: var(--flexion-red); }
 }
 .fx-hero .btn-primary {
     background-color: var(--flexion-red);
-    border-color: var(--flexion-red);
+    border-color:     var(--flexion-red);
 }
 
 /* ===================================================
@@ -166,12 +260,25 @@ a:hover { color: var(--flexion-red); }
 }
 
 /* ===================================================
-   Kart Boyutları (Eşit)
+   Kart Görselleri — Sabit Boyut
+   Hem <img> hem <div> placeholder için çalışır
    =================================================== */
-.fx-card-img {
-    height: 200px;
+.fx-card-img,
+img.fx-card-img {
+    display: block;
+    height: 200px !important;
+    width:  100%  !important;
     object-fit: cover;
-    width: 100%;
+    object-position: center;
+    flex-shrink: 0;
+}
+div.fx-card-img {
+    display: flex !important;
+    height: 200px !important;
+    width:  100%  !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 /* ===================================================
@@ -187,28 +294,64 @@ a:hover { color: var(--flexion-red); }
 
 /* ===================================================
    Ürün Teknik Tablo Stilleri
+   (.product-spec-table) + TinyMCE açıklama tabloları
    =================================================== */
-.product-spec-table {
+.product-spec-table,
+.product-description table {
     border-collapse: collapse;
     width: 100%;
     font-size: .9rem;
+    margin-bottom: 0;
 }
-.product-spec-table thead th {
+
+/* Tablo başlık satırı */
+.product-spec-table thead th,
+.product-description table thead th,
+.product-description table th {
     border-bottom: 2px solid var(--flexion-red);
+    border-top: none;
     font-weight: 600;
-    padding: .5rem .75rem;
+    padding: .55rem .75rem;
     background: #fff;
     color: #1f2933;
+    white-space: nowrap;
 }
-.product-spec-table tbody tr:nth-child(odd)  { background: #ffffff; }
-.product-spec-table tbody tr:nth-child(even) { background: #f9f9f9; }
-.product-spec-table td {
+
+/* Alt başlık (iki satırlı header için küçük metin) */
+.product-spec-table thead th small,
+.product-description table thead th small {
+    display: block;
+    font-weight: 400;
+    color: #6b7280;
+    font-size: .75rem;
+}
+
+/* Gövde satırları — zebra */
+.product-spec-table tbody tr:nth-child(odd),
+.product-description table tbody tr:nth-child(odd)  { background: #ffffff; }
+.product-spec-table tbody tr:nth-child(even),
+.product-description table tbody tr:nth-child(even) { background: #f8f9fa; }
+
+.product-spec-table td,
+.product-description table td {
     border-bottom: 1px solid #f0f0f0;
     padding: .45rem .75rem;
     color: #374151;
+    vertical-align: middle;
 }
-.product-spec-table tbody tr:last-child td { border-bottom: 2px solid var(--flexion-red); }
-.product-spec-table td:first-child { font-weight: 500; color: #111; }
+
+/* Son satır alt çizgisi */
+.product-spec-table tbody tr:last-child td,
+.product-description table tbody tr:last-child td {
+    border-bottom: 2px solid var(--flexion-red);
+}
+
+/* İlk sütun kalın — özellik adı */
+.product-spec-table td:first-child,
+.product-description table td:first-child {
+    font-weight: 600;
+    color: #111;
+}
 
 /* ===================================================
    Ürün Açıklama (H2/H3 Kırmızı Başlıklar)
@@ -223,11 +366,27 @@ a:hover { color: var(--flexion-red); }
     text-transform: uppercase;
     letter-spacing: .04em;
 }
-.product-description p { margin-bottom: .5rem; font-size: .92rem; }
-.product-description ul, .product-description ol {
-    font-size: .92rem;
-    padding-left: 1.25rem;
-    margin-bottom: .75rem;
+.product-description p  { margin-bottom: .5rem;  font-size: .92rem; }
+.product-description ul,
+.product-description ol { font-size: .92rem; padding-left: 1.25rem; margin-bottom: .75rem; }
+
+/* Regulations (sol sütun altı) */
+.fx-regulation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: .35rem .65rem;
+    font-size: .78rem;
+    background: #fafafa;
+    color: #374151;
+    font-weight: 500;
+}
+.fx-regulation-badge img {
+    height: 22px;
+    width:  auto;
+    object-fit: contain;
 }
 
 /* ===================================================
@@ -263,9 +422,7 @@ a:hover { color: var(--flexion-red); }
     to   { opacity: 1; }
 }
 
-.fx-animate {
-    opacity: 0;
-}
+.fx-animate { opacity: 0; }
 .fx-animate.fx-visible {
     animation: fadeInUp .55s ease forwards;
 }
@@ -312,9 +469,11 @@ a:hover { color: var(--flexion-red); }
    Responsive
    =================================================== */
 @media (max-width: 767.98px) {
-    .fx-hero { padding: 2.5rem 0; }
-    .fx-page-banner { min-height: 140px; }
-    .fx-card-img { height: 160px; }
+    .fx-hero         { padding: 2.5rem 0; }
+    .fx-page-banner  { min-height: 140px; }
+    .fx-card-img,
+    img.fx-card-img,
+    div.fx-card-img  { height: 160px !important; }
 
     .navbar .form-control.form-control-sm { font-size: 0.85rem; }
     .fx-main-nav .nav-link {

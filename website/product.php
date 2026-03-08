@@ -139,20 +139,23 @@ try {
         </nav>
 
         <div class="row g-4 mb-5">
-            <!-- Görseller -->
+            <!-- ═══════════ SOL: Görsel + Küçük resimler + Regülasyonlar ═══════════ -->
             <div class="col-md-5 fx-animate">
+
+                <!-- Ana görsel -->
                 <?php if (!empty($product['main_image'])): ?>
                     <img id="main-product-img"
                          src="<?= e($product['main_image']) ?>"
                          alt="<?= e($product['name']) ?>"
                          class="img-fluid rounded-3 shadow-sm w-100"
-                         style="max-height:380px;object-fit:contain;">
+                         style="max-height:380px;object-fit:contain;background:#f8f9fa;">
                 <?php else: ?>
-                    <div class="bg-light border rounded-3 d-flex align-items-center justify-content-center" style="min-height:260px;">
-                        <span class="text-muted small">Ürün görseli henüz eklenmemiş</span>
+                    <div class="bg-light border rounded-3 d-flex align-items-center justify-content-center" style="min-height:280px;">
+                        <span class="text-muted small"><i class="bi bi-image fs-1 d-block mb-2 opacity-50"></i>Görsel eklenmemiş</span>
                     </div>
                 <?php endif; ?>
 
+                <!-- Küçük resim galerisi -->
                 <?php if (!empty($extraImages) || !empty($product['main_image'])): ?>
                     <div class="d-flex gap-2 mt-3 flex-wrap">
                         <?php if (!empty($product['main_image'])): ?>
@@ -169,41 +172,52 @@ try {
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
-            </div>
 
-            <!-- Detaylar -->
-            <div class="col-md-7 fx-animate" data-delay="80">
-                <p class="small text-muted mb-1"><?= e($product['category_name']) ?></p>
-                <h1 class="h3 mb-1"><?= e($product['name']) ?></h1>
-                <?php if (!empty($product['code'])): ?>
-                    <p class="small text-muted mb-3">Ürün kodu: <strong><?= e($product['code']) ?></strong></p>
-                <?php endif; ?>
-                <?php if (!empty($product['short_description'])): ?>
-                    <p class="mb-4 text-muted"><?= e($product['short_description']) ?></p>
-                <?php endif; ?>
-
+                <!-- Regülasyonlar & Sertifikalar (referans: sol sütun altı) -->
                 <?php if ($regulations): ?>
-                    <div class="mb-4">
-                        <h2 class="h6 mb-2 text-uppercase text-muted" style="font-size:.75rem;letter-spacing:.05em;">Regülasyonlar &amp; Sertifikalar</h2>
+                    <div class="mt-4 pt-3 border-top">
+                        <p class="small text-uppercase text-muted fw-semibold mb-2" style="font-size:.72rem;letter-spacing:.06em;">
+                            Regülasyonlar &amp; Sertifikalar
+                        </p>
                         <div class="d-flex flex-wrap gap-2">
                             <?php foreach ($regulations as $reg): ?>
-                                <div class="border rounded-pill px-3 py-1 small d-flex align-items-center bg-light gap-2">
+                                <span class="fx-regulation-badge">
                                     <?php if (!empty($reg['icon'])): ?>
-                                        <img src="<?= e($reg['icon']) ?>" alt="<?= e($reg['title']) ?>" height="18">
+                                        <img src="<?= e($reg['icon']) ?>" alt="<?= e($reg['title']) ?>">
                                     <?php endif; ?>
-                                    <span><?= e($reg['title']) ?></span>
-                                </div>
+                                    <?= e($reg['title']) ?>
+                                </span>
                             <?php endforeach; ?>
                         </div>
                     </div>
                 <?php endif; ?>
+            </div>
 
-                <!-- Doküman Butonları -->
+            <!-- ═══════════ SAĞ: Bilgi, doküman, buton ═══════════ -->
+            <div class="col-md-7 fx-animate" data-delay="80">
+
+                <!-- Kategori yolu (referans: / Food /) -->
+                <p class="small text-muted mb-1">
+                    / <a href="category.php?id=<?= e((string)$product['category_id']) ?>"
+                         class="text-muted text-decoration-none"><?= e($product['category_name']) ?></a> /
+                </p>
+
+                <h1 class="h2 fw-bold mb-1"><?= e($product['name']) ?></h1>
+
+                <?php if (!empty($product['code'])): ?>
+                    <p class="small text-muted mb-3">Ürün kodu: <strong><?= e($product['code']) ?></strong></p>
+                <?php endif; ?>
+
+                <?php if (!empty($product['short_description'])): ?>
+                    <p class="mb-4 text-secondary"><?= e($product['short_description']) ?></p>
+                <?php endif; ?>
+
+                <!-- Doküman Butonları (referans: Technical sheet ↓, Other documents ↓) -->
                 <?php if (!empty($documents)): ?>
                     <div class="d-flex flex-wrap gap-2 mb-4">
                         <?php foreach ($documents as $doc): ?>
                             <a href="<?= e($doc['file_path']) ?>" target="_blank" rel="noopener"
-                               class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
                                 <i class="bi bi-file-earmark-arrow-down"></i>
                                 <?= e($doc['title']) ?>
                             </a>
@@ -211,8 +225,8 @@ try {
                     </div>
                 <?php endif; ?>
 
-                <!-- Bilgi Al Butonu -->
-                <button type="button" class="btn btn-primary px-5 py-2"
+                <!-- Bilgi Al Butonu — tam genişlik, kırmızı (referans: Request Information) -->
+                <button type="button" class="btn btn-primary w-100 py-2 mt-2"
                         data-bs-toggle="modal" data-bs-target="#inquiryModal">
                     <i class="bi bi-envelope me-2"></i>Bilgi Al
                 </button>
@@ -234,19 +248,22 @@ try {
         <?php if ($specTables): ?>
         <div class="row mb-5">
             <div class="col-12">
-                <h2 class="h5 mb-3">Teknik Özellikler</h2>
+                <h2 class="h5 mb-3 pb-2 border-bottom">Teknik Özellikler</h2>
             </div>
             <?php foreach ($specTables as $table): ?>
                 <div class="col-12 mb-4">
-                    <?php if (!empty($table['title'])): ?>
-                        <h3 class="h6 mb-2 text-muted"><?= e($table['title']) ?></h3>
-                    <?php endif; ?>
                     <div class="table-responsive">
                         <table class="product-spec-table">
+                            <thead>
+                                <tr>
+                                    <th><?= !empty($table['title']) ? e($table['title']) : 'Özellik' ?></th>
+                                    <th>Değer</th>
+                                </tr>
+                            </thead>
                             <tbody>
                             <?php $rows = $specRowsByTable[$table['id']] ?? []; ?>
                             <?php if (empty($rows)): ?>
-                                <tr><td colspan="2" class="text-muted small">Tablo boş</td></tr>
+                                <tr><td colspan="2" class="text-muted small py-3">Tablo boş</td></tr>
                             <?php else: ?>
                                 <?php foreach ($rows as $row): ?>
                                 <tr>

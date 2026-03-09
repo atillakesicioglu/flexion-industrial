@@ -40,6 +40,13 @@ $token = csrf_token();
 include __DIR__ . '/partials_header.php';
 ?>
 
+<?php if (!empty($_GET['force'])): ?>
+<div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <strong>Güvenlik uyarısı:</strong>&nbsp;Varsayılan şifreyi kullanıyorsunuz. Devam etmeden önce lütfen şifrenizi değiştirin.
+</div>
+<?php endif; ?>
+
 <div class="row">
     <div class="col-lg-6">
         <div class="card border-0 shadow-sm mb-4">

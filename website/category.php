@@ -16,6 +16,7 @@ try {
     $stmt->execute([':id' => $categoryId]);
     $category = $stmt->fetch();
 } catch (Throwable $e) {
+    error_log('[flexion] category query failed: ' . $e->getMessage());
     $category = null;
 }
 
@@ -32,7 +33,8 @@ if (!$category) {
     exit;
 }
 
-$categoriesTree = get_categories_tree();
+$categoriesTree   = get_categories_tree();
+$activeCategoryId = $categoryId;
 
 $orderSql = 'ORDER BY sort_order ASC, name ASC';
 if ($sort === 'az') {
@@ -48,6 +50,7 @@ try {
     $countStmt->execute([':cid' => $categoryId]);
     $totalProducts = (int) $countStmt->fetchColumn();
 } catch (Throwable $e) {
+    error_log('[flexion] category product count query failed: ' . $e->getMessage());
     $totalProducts = 0;
 }
 
@@ -67,6 +70,7 @@ try {
     $stmt->execute();
     $products = $stmt->fetchAll();
 } catch (Throwable $e) {
+    error_log('[flexion] category products query failed: ' . $e->getMessage());
     $products = [];
 }
 ?>
@@ -75,55 +79,7 @@ try {
     <div class="container">
         <div class="row">
             <aside class="col-lg-3 mb-4 mb-lg-0">
-                <h2 class="h6 text-uppercase text-muted mb-3">Sektörler</h2>
-                <div class="fx-cat-accordion">
-                    <?php foreach ($categoriesTree as $cat):
-                        $cid         = (int)$cat['id'];
-                        $hasChildren = !empty($cat['children']);
-                        $accId       = 'fx-cat-' . $cid;
-                        // Aktif: bu kategori seçili VEYA seçili kategori bu kategorinin çocuğu
-                        $isOpen = ($cid === $categoryId);
-                        if (!$isOpen && $hasChildren) {
-                            foreach ($cat['children'] as $ch) {
-                                if ((int)$ch['id'] === $categoryId) { $isOpen = true; break; }
-                            }
-                        }
-                    ?>
-                    <div class="fx-cat-item">
-                        <?php if ($hasChildren): ?>
-                            <button class="fx-cat-btn<?= $isOpen ? ' fx-cat-active' : '' ?>"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#<?= $accId ?>"
-                                    aria-expanded="<?= $isOpen ? 'true' : 'false' ?>"
-                                    aria-controls="<?= $accId ?>">
-                                <span><?= e($cat['name']) ?></span>
-                                <i class="bi bi-chevron-down fx-cat-chevron"></i>
-                            </button>
-                            <div class="collapse<?= $isOpen ? ' show' : '' ?>" id="<?= $accId ?>">
-                                <div class="fx-cat-children">
-                                    <?php foreach ($cat['children'] as $child): ?>
-                                        <a href="category?id=<?= (int)$child['id'] ?>"
-                                           class="fx-cat-child-link<?= (int)$child['id'] === $categoryId ? ' fx-cat-child-active' : '' ?>">
-                                            <?= e($child['name']) ?>
-                                        </a>
-                                    <?php endforeach; ?>
-                                    <a href="category?id=<?= $cid ?>"
-                                       class="fx-cat-child-link fx-cat-all-link">
-                                        <i class="bi bi-grid-3x3-gap me-1"></i>Tümünü gör
-                                    </a>
-                                </div>
-                            </div>
-                        <?php else: ?>
-                            <a href="category?id=<?= $cid ?>"
-                               class="fx-cat-btn text-decoration-none<?= $isOpen ? ' fx-cat-active' : '' ?>">
-                                <span><?= e($cat['name']) ?></span>
-                                <i class="bi bi-chevron-right fx-cat-chevron" style="transform:none;"></i>
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
+                <?php require __DIR__ . '/includes/categories_sidebar.php'; ?>
             </aside>
             <div class="col-lg-9">
                 <div class="d-flex justify-content-between align-items-end mb-3 flex-wrap gap-3">

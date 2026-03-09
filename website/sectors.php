@@ -2,53 +2,17 @@
 
 require_once __DIR__ . '/includes/header.php';
 
-$categoriesTree = get_categories_tree();
+$categoriesTree   = get_categories_tree();
+// Sektörler sayfasında üst seviye kategoriler kart olarak listelenir
+$categories       = $categoriesTree;
+$activeCategoryId = 0;
 ?>
 
 <section class="py-5">
     <div class="container">
         <div class="row">
             <aside class="col-lg-3 mb-4 mb-lg-0">
-                <h2 class="h6 text-uppercase text-muted mb-3">Sektörler</h2>
-                <div class="fx-cat-accordion">
-                    <?php foreach ($categoriesTree as $cat):
-                        $cid        = (int)$cat['id'];
-                        $hasChildren = !empty($cat['children']);
-                        $accId       = 'fx-cat-' . $cid;
-                    ?>
-                    <div class="fx-cat-item">
-                        <?php if ($hasChildren): ?>
-                            <button class="fx-cat-btn"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#<?= $accId ?>"
-                                    aria-expanded="false"
-                                    aria-controls="<?= $accId ?>">
-                                <span><?= e($cat['name']) ?></span>
-                                <i class="bi bi-chevron-down fx-cat-chevron"></i>
-                            </button>
-                            <div class="collapse" id="<?= $accId ?>">
-                                <div class="fx-cat-children">
-                                    <?php foreach ($cat['children'] as $child): ?>
-                                        <a href="category?id=<?= (int)$child['id'] ?>"
-                                           class="fx-cat-child-link"><?= e($child['name']) ?></a>
-                                    <?php endforeach; ?>
-                                    <a href="category?id=<?= $cid ?>"
-                                       class="fx-cat-child-link fx-cat-all-link">
-                                        <i class="bi bi-grid-3x3-gap me-1"></i>Tümünü gör
-                                    </a>
-                                </div>
-                            </div>
-                        <?php else: ?>
-                            <a href="category?id=<?= $cid ?>"
-                               class="fx-cat-btn text-decoration-none">
-                                <span><?= e($cat['name']) ?></span>
-                                <i class="bi bi-chevron-right fx-cat-chevron" style="transform:none;"></i>
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
+                <?php require __DIR__ . '/includes/categories_sidebar.php'; ?>
             </aside>
             <div class="col-lg-9">
                 <div class="d-flex justify-content-between align-items-end mb-4">

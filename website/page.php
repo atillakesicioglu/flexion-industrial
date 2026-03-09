@@ -36,43 +36,58 @@ if ($page && $slug === 'iletisim'
     && $_SERVER['REQUEST_METHOD'] === 'POST'
     && !empty($_POST['contact_submit'])
 ) {
-    $cName    = trim($_POST['contact_name']    ?? '');
-    $cSurname = trim($_POST['contact_surname'] ?? '');
-    $cEmail2  = trim($_POST['contact_email']   ?? '');
-    $cPhone2  = trim($_POST['contact_phone']   ?? '');
-    $cCompany = trim($_POST['contact_company'] ?? '');
-    $cMsg     = trim($_POST['contact_message'] ?? '');
-
-    if (!$cName || !$cEmail2 || !$cMsg) {
-        $formError = 'Lütfen zorunlu alanları doldurun (Ad, E-posta, Mesaj).';
-    } elseif (!filter_var($cEmail2, FILTER_VALIDATE_EMAIL)) {
-        $formError = 'Geçerli bir e-posta adresi girin.';
-    } else {
-        $fullName = trim($cName . ' ' . $cSurname);
-        try {
-            $ins = $pdo->prepare('INSERT INTO contact_submissions
-                (type,name,email,phone,company,message)
-                VALUES(:type,:name,:email,:phone,:company,:msg)');
-            $ins->execute([
-                ':type'    => 'contact',
-                ':name'    => $fullName,
-                ':email'   => $cEmail2,
-                ':phone'   => $cPhone2  ?: null,
-                ':company' => $cCompany ?: null,
-                ':msg'     => $cMsg,
-            ]);
-        } catch (Throwable $e2) { /* tablo yoksa sessizce geç */ }
-
-        $toMail = get_setting('contact_email', '');
-        if ($toMail) {
-            $subj = 'Flexion İletişim: ' . $fullName;
-            $body = "Ad: $fullName\nE-posta: $cEmail2\nTelefon: $cPhone2\nŞirket: $cCompany\n\nMesaj:\n$cMsg";
-            @mail($toMail, $subj, $body, "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com'));
-        }
-
-        // PRG: Yönlendir → double-submit ve 500 engeli
-        header('Location: /' . $slug . '?sent=1');
+    // Honeypot: bot doldurursa sessizce geç
+    if (!empty($_POST['website_url'])) {
+        header('Location: /iletisim?sent=1');
         exit;
+    }
+
+    if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
+        $formError = 'Güvenlik doğrulaması başarısız. Lütfen sayfayı yenileyin ve tekrar deneyin.';
+    } else {
+        $cName    = trim($_POST['contact_name']    ?? '');
+        $cSurname = trim($_POST['contact_surname'] ?? '');
+        $cEmail2  = trim($_POST['contact_email']   ?? '');
+        $cPhone2  = trim($_POST['contact_phone']   ?? '');
+        $cCompany = trim($_POST['contact_company'] ?? '');
+        $cMsg     = trim($_POST['contact_message'] ?? '');
+
+        if (!$cName || !$cEmail2 || !$cMsg) {
+            $formError = 'Lütfen zorunlu alanları doldurun (Ad, E-posta, Mesaj).';
+        } elseif (!filter_var($cEmail2, FILTER_VALIDATE_EMAIL)) {
+            $formError = 'Geçerli bir e-posta adresi girin.';
+        } else {
+            $fullName = trim($cName . ' ' . $cSurname);
+            try {
+                $ins = $pdo->prepare('INSERT INTO contact_submissions
+                    (type,name,email,phone,company,message)
+                    VALUES(:type,:name,:email,:phone,:company,:msg)');
+                $ins->execute([
+                    ':type'    => 'contact',
+                    ':name'    => $fullName,
+                    ':email'   => $cEmail2,
+                    ':phone'   => $cPhone2  ?: null,
+                    ':company' => $cCompany ?: null,
+                    ':msg'     => $cMsg,
+                ]);
+            } catch (Throwable $e2) {
+                error_log('[flexion] contact form DB insert failed: ' . $e2->getMessage());
+            }
+
+            $toMail = get_setting('contact_email', '');
+            if ($toMail) {
+                $subj   = 'Flexion İletişim: ' . $fullName;
+                $body   = "Ad: $fullName\nE-posta: $cEmail2\nTelefon: $cPhone2\nŞirket: $cCompany\n\nMesaj:\n$cMsg";
+                $from   = "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com');
+                if (!@mail($toMail, $subj, $body, $from)) {
+                    error_log('[flexion] contact form mail() failed — to:' . $toMail);
+                }
+            }
+
+            // PRG: Yönlendir → double-submit ve 500 engeli
+            header('Location: /' . $slug . '?sent=1');
+            exit;
+        }
     }
 }
 
@@ -140,7 +155,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
                 <h1 class="h2 mb-4"><?= e($page['title']) ?></h1>
                 <?php endif; ?>
                 <div class="page-content">
-                    <?= $page['content'] ?>
+                    <?= sanitize_html($page['content']) ?>
                 </div>
             </div>
         </div>
@@ -156,7 +171,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
                 <h1 class="h2 mb-4"><?= e($page['title']) ?></h1>
                 <?php endif; ?>
                 <?php if ($page['content']): ?>
-                    <div class="page-content mb-4"><?= $page['content'] ?></div>
+                    <div class="page-content mb-4"><?= sanitize_html($page['content']) ?></div>
                 <?php endif; ?>
 
                 <!-- İletişim bilgileri -->
@@ -214,6 +229,11 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
                         <div class="alert alert-danger py-2 small"><?= e($formError) ?></div>
                     <?php endif; ?>
                     <form method="post">
+                        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                        <!-- Honeypot: botlar doldurur, gerçek kullanıcılar görmez -->
+                        <div style="display:none;" aria-hidden="true">
+                            <input type="text" name="website_url" tabindex="-1" autocomplete="off" value="">
+                        </div>
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label class="form-label">Ad <span class="text-danger">*</span></label>

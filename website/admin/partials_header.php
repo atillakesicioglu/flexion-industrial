@@ -1,6 +1,7 @@
 <?php
-require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/auth.php';
 require_admin_login();
+require_password_change_if_needed();
 ?>
 <!DOCTYPE html>
 <html lang="tr">

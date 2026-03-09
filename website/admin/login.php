@@ -87,9 +87,11 @@ $token = csrf_token();
                 <label class="form-label">Şifre</label>
                 <input type="password" name="password" class="form-control" required>
             </div>
+            <?php if (APP_ENV === 'development'): ?>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <small class="text-muted">Varsayılan: <strong>admin / admin123</strong></small>
             </div>
+            <?php endif; ?>
             <button type="submit" class="btn btn-primary w-100">
                 Giriş Yap
             </button>

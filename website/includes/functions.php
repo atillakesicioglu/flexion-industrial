@@ -12,6 +12,37 @@ function e(?string $value): string
 }
 
 /**
+ * Admin tarafından girilen HTML içeriğini tehlikeli etiketlerden arındırır.
+ * WYSIWYG çıktıları için: script, iframe, form vb. kaldırılır,
+ * normal içerik etiketleri (p, strong, img, a …) korunur.
+ */
+function sanitize_html(?string $html): string
+{
+    if ($html === null || $html === '') {
+        return '';
+    }
+
+    // Kesinlikle kod çalıştırabilecek veya dış kaynak gömebilecek etiketler
+    $dangerous = ['script', 'iframe', 'object', 'embed', 'applet', 'base',
+                  'form', 'input', 'button', 'select', 'textarea', 'link', 'meta', 'style'];
+
+    foreach ($dangerous as $tag) {
+        // Açılış + kapanış çifti
+        $html = preg_replace('/<\s*' . $tag . '(\s[^>]*)?>.*?<\s*\/\s*' . $tag . '\s*>/si', '', $html);
+        // Self-closing veya kapanışsız etiket
+        $html = preg_replace('/<\s*' . $tag . '(\s[^>]*)?\/?>/si', '', $html);
+    }
+
+    // Inline olay işleyicileri (onclick, onload …)
+    $html = preg_replace('/\s+on\w+\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]*)/i', '', $html);
+
+    // javascript: protokolü (href, src vb.)
+    $html = preg_replace('/\b(href|src|action)\s*=\s*["\']?\s*javascript:/i', '$1="#" data-removed=', $html);
+
+    return $html;
+}
+
+/**
  * Admin login olmuş mu kontrol eder.
  */
 function is_admin_logged_in(): bool
@@ -107,6 +138,7 @@ function get_setting(string $key, ?string $default = null): ?string
                 $settings[$row['setting_key']] = $row['setting_value'];
             }
         } catch (Throwable $e) {
+            error_log('[flexion] get_setting failed: ' . $e->getMessage());
             $settings = [];
         }
     }
@@ -124,6 +156,7 @@ function get_main_menu(): array
         $stmt  = $pdo->query('SELECT * FROM menu_items WHERE is_active = 1 ORDER BY sort_order ASC, id ASC');
         $items = $stmt->fetchAll();
     } catch (Throwable $e) {
+        error_log('[flexion] get_main_menu failed: ' . $e->getMessage());
         return [];
     }
 
@@ -160,6 +193,7 @@ function get_active_categories(): array
         $stmt = $pdo->query('SELECT * FROM categories WHERE is_active = 1 ORDER BY sort_order ASC, name ASC');
         return $stmt->fetchAll();
     } catch (Throwable $e) {
+        error_log('[flexion] get_active_categories failed: ' . $e->getMessage());
         return [];
     }
 }
@@ -176,6 +210,7 @@ function get_categories_tree(): array
         $stmt = $pdo->query('SELECT * FROM categories WHERE is_active = 1 ORDER BY sort_order ASC, name ASC');
         $all  = $stmt->fetchAll();
     } catch (Throwable $e) {
+        error_log('[flexion] get_categories_tree failed: ' . $e->getMessage());
         return [];
     }
 
@@ -217,6 +252,7 @@ function get_home_sections(): array
         $pdo  = db();
         $stmt = $pdo->query('SELECT * FROM home_sections WHERE is_active = 1 ORDER BY sort_order ASC, id ASC');
     } catch (Throwable $e) {
+        error_log('[flexion] get_home_sections failed: ' . $e->getMessage());
         return [];
     }
 
@@ -247,7 +283,43 @@ function get_latest_news(int $limit = 3): array
         $stmt->execute();
         return $stmt->fetchAll();
     } catch (Throwable $e) {
+        error_log('[flexion] get_latest_news failed: ' . $e->getMessage());
         return [];
     }
+}
+
+/**
+ * Haberler banner HTML'ini basar (liste ve detay görünümü için ortak).
+ * Çağrıldığı yerde doğrudan ekrana yazar.
+ */
+function render_news_banner(): void
+{
+    $bannerImg   = get_setting('news_banner_image', '');
+    if (!$bannerImg) {
+        return;
+    }
+    $bannerTitle = get_setting('news_banner_title', 'Haberler &amp; Insights');
+    $opacity     = max(0, min(100, (int) get_setting('news_banner_opacity', '50')));
+    $blur        = max(0, min(20,  (int) get_setting('news_banner_blur', '0')));
+    $titleColor  = get_setting('news_banner_title_color', '#ffffff');
+    $titleSize   = get_setting('news_banner_title_size', '2rem');
+    $titlePos    = get_setting('news_banner_title_position', 'center');
+    $alignMap    = ['left' => 'text-start', 'center' => 'text-center', 'right' => 'text-end'];
+    $alignClass  = $alignMap[$titlePos] ?? 'text-center';
+    ?>
+    <section class="fx-page-banner mb-0">
+        <div class="fx-banner-bg" style="background-image:url('<?= e($bannerImg) ?>');
+             filter:blur(<?= $blur ?>px); transform:scale(1.05);"></div>
+        <div class="fx-banner-overlay" style="background:rgba(0,0,0,<?= round($opacity / 100, 2) ?>);"></div>
+        <div class="fx-banner-content">
+            <div class="container <?= $alignClass ?>">
+                <h1 class="fx-banner-title"
+                    style="color:<?= e($titleColor) ?>;font-size:<?= e($titleSize) ?>;">
+                    <?= e($bannerTitle) ?>
+                </h1>
+            </div>
+        </div>
+    </section>
+    <?php
 }
 

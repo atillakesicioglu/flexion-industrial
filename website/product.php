@@ -12,46 +12,60 @@ $inquirySent  = isset($_GET['sent']) && $_GET['sent'] === '1';
 $inquiryError = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['inquiry_submit'])) {
-    $iName    = trim($_POST['inq_name']    ?? '');
-    $iSurname = trim($_POST['inq_surname'] ?? '');
-    $iEmail   = trim($_POST['inq_email']   ?? '');
-    $iPhone   = trim($_POST['inq_phone']   ?? '');
-    $iCompany = trim($_POST['inq_company'] ?? '');
-    $iCountry = trim($_POST['inq_country'] ?? '');
-    $iMsg     = trim($_POST['inq_message'] ?? '');
-    $iPid     = (int)($_POST['inq_product_id'] ?? 0);
-
-    if (!$iName || !$iEmail || !$iMsg) {
-        $inquiryError = 'Ad, e-posta ve mesaj zorunludur.';
-    } elseif (!filter_var($iEmail, FILTER_VALIDATE_EMAIL)) {
-        $inquiryError = 'Geçerli bir e-posta adresi girin.';
-    } else {
-        $fullName = trim($iName . ' ' . $iSurname);
-        try {
-            $ins = $pdo->prepare('INSERT INTO contact_submissions
-                (type,product_id,name,email,phone,company,country,message)
-                VALUES(:type,:pid,:name,:email,:phone,:company,:country,:msg)');
-            $ins->execute([
-                ':type'    => 'inquiry',
-                ':pid'     => $iPid ?: null,
-                ':name'    => $fullName,
-                ':email'   => $iEmail,
-                ':phone'   => $iPhone  ?: null,
-                ':company' => $iCompany ?: null,
-                ':country' => $iCountry ?: null,
-                ':msg'     => $iMsg,
-            ]);
-        } catch (Throwable $e2) { /* tablo henüz yoksa sessizce geç */ }
-        // E-posta bildirim
-        $toMail = get_setting('contact_email', '');
-        if ($toMail) {
-            $subj = 'Flexion Bilgi Talebi - ' . ($iCompany ?: $fullName);
-            $body = "Ürün ID: $iPid\nAd: $fullName\nE-posta: $iEmail\nTelefon: $iPhone\nŞirket: $iCompany\nÜlke: $iCountry\n\nMesaj:\n$iMsg";
-            @mail($toMail, $subj, $body, "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com'));
-        }
-        // PRG redirect → sayfayı yenileme double-submit yapmaz, 500 hatası ortadan kalkar
+    // Honeypot: bot doldurursa sessizce geç
+    if (!empty($_POST['website_url'])) {
         header('Location: product?id=' . $productId . '&sent=1');
         exit;
+    }
+
+    if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
+        $inquiryError = 'Güvenlik doğrulaması başarısız. Lütfen sayfayı yenileyin ve tekrar deneyin.';
+    } else {
+        $iName    = trim($_POST['inq_name']    ?? '');
+        $iSurname = trim($_POST['inq_surname'] ?? '');
+        $iEmail   = trim($_POST['inq_email']   ?? '');
+        $iPhone   = trim($_POST['inq_phone']   ?? '');
+        $iCompany = trim($_POST['inq_company'] ?? '');
+        $iCountry = trim($_POST['inq_country'] ?? '');
+        $iMsg     = trim($_POST['inq_message'] ?? '');
+        $iPid     = (int) ($_POST['inq_product_id'] ?? 0);
+
+        if (!$iName || !$iEmail || !$iMsg) {
+            $inquiryError = 'Ad, e-posta ve mesaj zorunludur.';
+        } elseif (!filter_var($iEmail, FILTER_VALIDATE_EMAIL)) {
+            $inquiryError = 'Geçerli bir e-posta adresi girin.';
+        } else {
+            $fullName = trim($iName . ' ' . $iSurname);
+            try {
+                $ins = $pdo->prepare('INSERT INTO contact_submissions
+                    (type,product_id,name,email,phone,company,country,message)
+                    VALUES(:type,:pid,:name,:email,:phone,:company,:country,:msg)');
+                $ins->execute([
+                    ':type'    => 'inquiry',
+                    ':pid'     => $iPid ?: null,
+                    ':name'    => $fullName,
+                    ':email'   => $iEmail,
+                    ':phone'   => $iPhone  ?: null,
+                    ':company' => $iCompany ?: null,
+                    ':country' => $iCountry ?: null,
+                    ':msg'     => $iMsg,
+                ]);
+            } catch (Throwable $e2) {
+                error_log('[flexion] inquiry form DB insert failed: ' . $e2->getMessage());
+            }
+            $toMail = get_setting('contact_email', '');
+            if ($toMail) {
+                $subj = 'Flexion Bilgi Talebi - ' . ($iCompany ?: $fullName);
+                $body = "Ürün ID: $iPid\nAd: $fullName\nE-posta: $iEmail\nTelefon: $iPhone\nŞirket: $iCompany\nÜlke: $iCountry\n\nMesaj:\n$iMsg";
+                $from = "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com');
+                if (!@mail($toMail, $subj, $body, $from)) {
+                    error_log('[flexion] inquiry form mail() failed — to:' . $toMail);
+                }
+            }
+            // PRG redirect → sayfayı yenileme double-submit yapmaz, 500 hatası ortadan kalkar
+            header('Location: product?id=' . $productId . '&sent=1');
+            exit;
+        }
     }
 }
 
@@ -64,6 +78,7 @@ try {
     $stmt->execute([':id' => $productId]);
     $product = $stmt->fetch();
 } catch (Throwable $e) {
+    error_log('[flexion] product query failed: ' . $e->getMessage());
     $product = null;
 }
 
@@ -86,7 +101,9 @@ try {
     $stmt = $pdo->prepare('SELECT * FROM product_regulations WHERE product_id = :pid AND is_active = 1 ORDER BY sort_order ASC, id ASC');
     $stmt->execute([':pid' => $productId]);
     $regulations = $stmt->fetchAll();
-} catch (Throwable $e) {}
+} catch (Throwable $e) {
+    error_log('[flexion] product regulations query failed: ' . $e->getMessage());
+}
 
 // Spec tables + rows
 $specTables      = [];
@@ -104,7 +121,9 @@ try {
             $specRowsByTable[$row['table_id']][] = $row;
         }
     }
-} catch (Throwable $e) {}
+} catch (Throwable $e) {
+    error_log('[flexion] product spec tables query failed: ' . $e->getMessage());
+}
 
 // Ek görseller
 $extraImages = [];
@@ -112,7 +131,9 @@ try {
     $imgStmt = $pdo->prepare('SELECT * FROM product_images WHERE product_id = :pid ORDER BY sort_order ASC, id ASC');
     $imgStmt->execute([':pid' => $productId]);
     $extraImages = $imgStmt->fetchAll();
-} catch (Throwable $e) {}
+} catch (Throwable $e) {
+    error_log('[flexion] product images query failed: ' . $e->getMessage());
+}
 
 // Dokümanlar
 $documents = [];
@@ -120,7 +141,9 @@ try {
     $docStmt = $pdo->prepare('SELECT * FROM product_documents WHERE product_id = :pid AND is_active = 1 ORDER BY sort_order ASC, id ASC');
     $docStmt->execute([':pid' => $productId]);
     $documents = $docStmt->fetchAll();
-} catch (Throwable $e) {}
+} catch (Throwable $e) {
+    error_log('[flexion] product documents query failed: ' . $e->getMessage());
+}
 
 // Benzer ürünler
 $relatedProducts = [];
@@ -128,7 +151,9 @@ try {
     $relatedStmt = $pdo->prepare('SELECT id, name, main_image, code FROM products WHERE category_id = :cid AND id <> :id AND is_active = 1 ORDER BY sort_order ASC, id ASC LIMIT 3');
     $relatedStmt->execute([':cid' => $product['category_id'], ':id' => $productId]);
     $relatedProducts = $relatedStmt->fetchAll();
-} catch (Throwable $e) {}
+} catch (Throwable $e) {
+    error_log('[flexion] related products query failed: ' . $e->getMessage());
+}
 ?>
 
 <section class="py-5">
@@ -223,7 +248,7 @@ try {
                 <!-- Uzun açıklama: kısa açıklama ile butonlar arasında (referans görseli gibi) -->
                 <?php if (!empty($product['description'])): ?>
                     <div class="product-description mb-4">
-                        <?= $product['description'] ?>
+                        <?= sanitize_html($product['description']) ?>
                     </div>
                 <?php endif; ?>
 
@@ -344,6 +369,11 @@ try {
                 <form method="post">
                     <input type="hidden" name="inquiry_submit" value="1">
                     <input type="hidden" name="inq_product_id" value="<?= e((string)$productId) ?>">
+                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                    <!-- Honeypot: botlar doldurur, gerçek kullanıcılar görmez -->
+                    <div style="display:none;" aria-hidden="true">
+                        <input type="text" name="website_url" tabindex="-1" autocomplete="off" value="">
+                    </div>
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <label class="form-label">Ad <span class="text-danger">*</span></label>

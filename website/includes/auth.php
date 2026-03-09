@@ -71,10 +71,26 @@ function admin_login(string $username, string $password): bool
     ensure_password_is_hashed($user, $password);
 
     session_regenerate_id(true);
-    $_SESSION['admin_id']       = (int) $user['id'];
-    $_SESSION['admin_username'] = $user['username'];
+    $_SESSION['admin_id']              = (int) $user['id'];
+    $_SESSION['admin_username']        = $user['username'];
+    $_SESSION['must_change_password']  = !empty($user['must_change_password']);
 
     return true;
+}
+
+/**
+ * Zorunlu şifre değiştirme bayrağı aktifse profil sayfasına yönlendirir.
+ * Admin sayfalarının başında çağrılmalı (partials_header veya ilgili sayfa).
+ */
+function require_password_change_if_needed(): void
+{
+    if (!empty($_SESSION['must_change_password'])) {
+        $current = basename($_SERVER['PHP_SELF'] ?? '');
+        if (!in_array($current, ['profile.php', 'logout.php'], true)) {
+            header('Location: profile.php?force=1');
+            exit;
+        }
+    }
 }
 
 /**
@@ -124,11 +140,14 @@ function change_admin_password(int $userId, string $currentPassword, string $new
 
     $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
 
-    $update = $pdo->prepare('UPDATE users SET password = :password WHERE id = :id');
+    $update = $pdo->prepare('UPDATE users SET password = :password, must_change_password = 0 WHERE id = :id');
     $update->execute([
         ':password' => $hashed,
         ':id'       => $userId,
     ]);
+
+    // Oturumdaki bayrağı da temizle
+    $_SESSION['must_change_password'] = false;
 
     return true;
 }

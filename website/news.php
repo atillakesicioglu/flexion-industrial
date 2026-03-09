@@ -11,6 +11,7 @@ if ($slug) {
         $stmt->execute([':slug' => $slug]);
         $article = $stmt->fetch();
     } catch (Throwable $e) {
+        error_log('[flexion] news article query failed: ' . $e->getMessage());
         $article = null;
     }
 
@@ -27,31 +28,7 @@ if ($slug) {
         exit;
     }
     ?>
-    <?php
-    $bannerImg   = get_setting('news_banner_image', '');
-    $bannerTitle = get_setting('news_banner_title', 'Haberler & Insights');
-    $nOpacity    = max(0, min(100, (int) get_setting('news_banner_opacity', '50')));
-    $nBlur       = max(0, min(20,  (int) get_setting('news_banner_blur', '0')));
-    $nTColor     = get_setting('news_banner_title_color', '#ffffff');
-    $nTSize      = get_setting('news_banner_title_size', '2rem');
-    $nTPos       = get_setting('news_banner_title_position', 'center');
-    $nAlignMap   = ['left'=>'text-start','center'=>'text-center','right'=>'text-end'];
-    $nAlignClass = $nAlignMap[$nTPos] ?? 'text-center';
-    if ($bannerImg): ?>
-        <section class="fx-page-banner mb-0">
-            <div class="fx-banner-bg" style="background-image:url('<?= e($bannerImg) ?>');
-                 filter:blur(<?= $nBlur ?>px); transform:scale(1.05);"></div>
-            <div class="fx-banner-overlay" style="background:rgba(0,0,0,<?= round($nOpacity/100,2) ?>);"></div>
-            <div class="fx-banner-content">
-                <div class="container <?= $nAlignClass ?>">
-                    <h1 class="fx-banner-title"
-                        style="color:<?= e($nTColor) ?>;font-size:<?= e($nTSize) ?>;">
-                        <?= e($bannerTitle) ?>
-                    </h1>
-                </div>
-            </div>
-        </section>
-    <?php endif; ?>
+    <?php render_news_banner(); ?>
 
     <section class="py-5">
         <div class="container">
@@ -67,7 +44,7 @@ if ($slug) {
                         <img src="<?= e($article['image']) ?>" alt="<?= e($article['title']) ?>" class="img-fluid rounded-3 mb-4">
                     <?php endif; ?>
                     <div class="text-muted small">
-                        <?= $article['content'] ?>
+                        <?= sanitize_html($article['content']) ?>
                     </div>
                 </div>
                 <div class="col-lg-4">
@@ -79,7 +56,9 @@ if ($slug) {
                             $side = $pdo->prepare('SELECT slug, title FROM news WHERE is_active = 1 AND id <> :id ORDER BY IFNULL(published_at, id) DESC LIMIT 6');
                             $side->execute([':id' => $article['id']]);
                             $sideNews = $side->fetchAll();
-                        } catch (Throwable $e) {}
+                        } catch (Throwable $e) {
+                            error_log('[flexion] side news query failed: ' . $e->getMessage());
+                        }
                         foreach ($sideNews as $n): ?>
                             <li class="mb-2">
                                 <a href="news?slug=<?= e($n['slug']) ?>" class="text-decoration-none">
@@ -102,34 +81,12 @@ $items = [];
 try {
     $stmt  = $pdo->query('SELECT * FROM news WHERE is_active = 1 ORDER BY IFNULL(published_at, id) DESC');
     $items = $stmt->fetchAll();
-} catch (Throwable $e) { /* tablo yoksa boş */ }
+} catch (Throwable $e) {
+    error_log('[flexion] news list query failed: ' . $e->getMessage());
+}
 ?>
 
-<?php
-$bannerImg   = get_setting('news_banner_image', '');
-$bannerTitle = get_setting('news_banner_title', 'Haberler & Insights');
-$nOpacity2   = max(0, min(100, (int) get_setting('news_banner_opacity', '50')));
-$nBlur2      = max(0, min(20,  (int) get_setting('news_banner_blur', '0')));
-$nTColor2    = get_setting('news_banner_title_color', '#ffffff');
-$nTSize2     = get_setting('news_banner_title_size', '2rem');
-$nTPos2      = get_setting('news_banner_title_position', 'center');
-$nAlignMap2  = ['left'=>'text-start','center'=>'text-center','right'=>'text-end'];
-$nAlignCls2  = $nAlignMap2[$nTPos2] ?? 'text-center';
-if ($bannerImg): ?>
-    <section class="fx-page-banner mb-0">
-        <div class="fx-banner-bg" style="background-image:url('<?= e($bannerImg) ?>');
-             filter:blur(<?= $nBlur2 ?>px); transform:scale(1.05);"></div>
-        <div class="fx-banner-overlay" style="background:rgba(0,0,0,<?= round($nOpacity2/100,2) ?>);"></div>
-        <div class="fx-banner-content">
-            <div class="container <?= $nAlignCls2 ?>">
-                <h1 class="fx-banner-title"
-                    style="color:<?= e($nTColor2) ?>;font-size:<?= e($nTSize2) ?>;">
-                    <?= e($bannerTitle) ?>
-                </h1>
-            </div>
-        </div>
-    </section>
-<?php endif; ?>
+<?php render_news_banner(); ?>
 
 <section class="py-5">
     <div class="container">

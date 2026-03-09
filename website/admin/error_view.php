@@ -2,21 +2,30 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_admin_login();
 
-$logFile = __DIR__ . '/flexion_errors.log';
+$logFile = ERROR_LOG_FILE;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clear'])) {
-    @unlink($logFile);
-    header('Location: error_view.php');
-    exit;
+    if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
+        $clearError = 'Güvenlik doğrulaması başarısız.';
+    } else {
+        @unlink($logFile);
+        header('Location: error_view.php');
+        exit;
+    }
 }
 
-$content = null;
+$clearError = null;
+$content    = null;
 if (is_file($logFile)) {
     $content = file_get_contents($logFile);
-} 
+}
 
 include __DIR__ . '/partials_header.php';
 ?>
+
+<?php if ($clearError): ?>
+    <div class="alert alert-danger py-2 mb-3"><?= e($clearError) ?></div>
+<?php endif; ?>
 
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -30,6 +39,7 @@ include __DIR__ . '/partials_header.php';
             </a>
             <?php if ($content !== null): ?>
                 <form method="post" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                     <button name="clear" class="btn btn-sm btn-outline-danger"
                             onclick="return confirm('Log dosyasını temizlemek istiyor musunuz?')">
                         <i class="bi bi-trash3 me-1"></i>Temizle

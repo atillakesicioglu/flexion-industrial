@@ -76,16 +76,13 @@ if ($page && $slug === 'iletisim'
 
             $toMail = get_setting('contact_email', '');
             if ($toMail) {
-                $subj   = 'Flexion İletişim: ' . $fullName;
-                $body   = "Ad: $fullName\nE-posta: $cEmail2\nTelefon: $cPhone2\nŞirket: $cCompany\n\nMesaj:\n$cMsg";
-                $from   = "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com');
-                if (!@mail($toMail, $subj, $body, $from)) {
-                    error_log('[flexion] contact form mail() failed — to:' . $toMail);
-                }
+                $subj = 'Flexion İletişim: ' . $fullName;
+                $body = "Ad: $fullName\nE-posta: $cEmail2\nTelefon: $cPhone2\nŞirket: $cCompany\n\nMesaj:\n$cMsg";
+                send_notification_mail($toMail, $subj, $body);
             }
 
             // PRG: Yönlendir → double-submit ve 500 engeli
-            header('Location: /' . $slug . '?sent=1');
+            header('Location: page.php?slug=' . urlencode($slug) . '&sent=1');
             exit;
         }
     }

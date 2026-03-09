@@ -57,13 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['inquiry_submit'])) {
             if ($toMail) {
                 $subj = 'Flexion Bilgi Talebi - ' . ($iCompany ?: $fullName);
                 $body = "Ürün ID: $iPid\nAd: $fullName\nE-posta: $iEmail\nTelefon: $iPhone\nŞirket: $iCompany\nÜlke: $iCountry\n\nMesaj:\n$iMsg";
-                $from = "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'flexion.com');
-                if (!@mail($toMail, $subj, $body, $from)) {
-                    error_log('[flexion] inquiry form mail() failed — to:' . $toMail);
-                }
+                send_notification_mail($toMail, $subj, $body);
             }
             // PRG redirect → sayfayı yenileme double-submit yapmaz, 500 hatası ortadan kalkar
-            header('Location: product?id=' . $productId . '&sent=1');
+            header('Location: product.php?id=' . $productId . '&sent=1');
             exit;
         }
     }

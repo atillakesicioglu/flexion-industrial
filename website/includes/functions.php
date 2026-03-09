@@ -289,6 +289,33 @@ function get_latest_news(int $limit = 3): array
 }
 
 /**
+ * Güvenli e-posta bildirimi gönderici.
+ *
+ * Hosting'de PHP mail() devre dışıysa hata vermek yerine sessizce loglar;
+ * bu sayede form işleme hiçbir zaman 500 üretmez.
+ */
+function send_notification_mail(string $to, string $subject, string $body, string $from = ''): void
+{
+    if (!$to) {
+        return;
+    }
+
+    if (!function_exists('mail')) {
+        error_log('[flexion] mail() function unavailable — e-posta gönderilemedi. Alıcı: ' . $to);
+        return;
+    }
+
+    if (!$from) {
+        $host = $_SERVER['HTTP_HOST'] ?? 'flexion.com';
+        $from = 'From: noreply@' . $host;
+    }
+
+    if (!@mail($to, $subject, $body, $from)) {
+        error_log('[flexion] mail() başarısız — Alıcı: ' . $to . ' | Konu: ' . $subject);
+    }
+}
+
+/**
  * Haberler banner HTML'ini basar (liste ve detay görünümü için ortak).
  * Çağrıldığı yerde doğrudan ekrana yazar.
  */

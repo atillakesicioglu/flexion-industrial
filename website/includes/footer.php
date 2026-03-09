@@ -70,7 +70,7 @@ foreach ($footerLinksRaw as $fl) {
                         <ul class="list-unstyled small">
                             <?php foreach ($colData['links'] as $fl): ?>
                                 <li class="mb-1">
-                                    <a href="<?= e($fl['url']) ?>"><?= e($fl['title']) ?></a>
+                                    <a href="<?= e($fl['url']) ?>" class="fx-footer-link"><?= e($fl['title']) ?></a>
                                 </li>
                             <?php endforeach; ?>
                         </ul>
@@ -81,15 +81,15 @@ foreach ($footerLinksRaw as $fl) {
                 <div class="col-6 col-md-2 col-lg-2">
                     <h6 class="text-white mb-3 fw-semibold">Kurumsal</h6>
                     <ul class="list-unstyled small">
-                        <li class="mb-1"><a href="/hakkimizda">Hakkımızda</a></li>
-                        <li class="mb-1"><a href="/iletisim">İletişim</a></li>
+                        <li class="mb-1"><a href="/hakkimizda" class="fx-footer-link">Hakkımızda</a></li>
+                        <li class="mb-1"><a href="/iletisim" class="fx-footer-link">İletişim</a></li>
                     </ul>
                 </div>
                 <div class="col-6 col-md-2 col-lg-2">
                     <h6 class="text-white mb-3 fw-semibold">Ürünler</h6>
                     <ul class="list-unstyled small">
-                        <li class="mb-1"><a href="/sectors">Tüm Ürünler</a></li>
-                        <li class="mb-1"><a href="/news">Haberler</a></li>
+                        <li class="mb-1"><a href="/sectors" class="fx-footer-link">Tüm Ürünler</a></li>
+                        <li class="mb-1"><a href="/news" class="fx-footer-link">Haberler</a></li>
                     </ul>
                 </div>
             <?php endif; ?>

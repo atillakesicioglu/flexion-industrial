@@ -188,20 +188,37 @@ a.text-dark:hover { color: var(--flexion-red) !important; }
     color: var(--flexion-red);
 }
 
-/* Aktif sayfa: kırmızı alt çizgi (masaüstü, Bootstrap's navbar bottom ile hizalı) */
+/* Hover: üst menü linklerinde ince kırmızı alt çizgi kayar girer (masaüstü) */
 @media (min-width: 992px) {
-    /* Normal nav-link (dropdown-toggle değil) */
-    .fx-main-nav .nav-link.active:not(.dropdown-toggle)::before {
+    .fx-main-nav .nav-link::after {
         content: '';
         position: absolute;
-        bottom: -1px;          /* navbar border-bottom ile örtüşür */
+        bottom: 2px;
         left: .5rem;
         right: .5rem;
         height: 2px;
         background: var(--flexion-red);
-        border-radius: 2px 2px 0 0;
+        border-radius: 2px;
+        transform: scaleX(0);
+        transition: transform .22s ease;
+        transform-origin: center;
     }
-    /* Dropdown toggle aktifse box-shadow ile çizgi */
+    /* Aktif link: çizgi kalıcı göster (active sınıfı zaten var, pseudo-before ile çakışmasın) */
+    .fx-main-nav .nav-link.active:not(.dropdown-toggle)::after {
+        transform: scaleX(1);
+    }
+    /* Hover: çizgi ortadan iki yana açılır */
+    .fx-main-nav .nav-link:hover::after {
+        transform: scaleX(1);
+    }
+    /* Dropdown toggle'da after yerine box-shadow tercih edildiğinden after'ı kapat */
+    .fx-main-nav .nav-link.dropdown-toggle::after {
+        display: none;
+    }
+}
+
+/* Aktif sayfa: dropdown toggle için box-shadow ile alt çizgi */
+@media (min-width: 992px) {
     .fx-main-nav .dropdown-toggle.active {
         box-shadow: inset 0 -2px 0 var(--flexion-red);
         padding-bottom: calc(.5rem - 1px);
@@ -229,21 +246,21 @@ a.text-dark:hover { color: var(--flexion-red) !important; }
         top: auto;   /* Bootstrap'in auto konumlandırmasını sıfırla */
         margin-top: 0 !important;
     }
-    /* Dropdown içindeki container: nav items sağda olduğundan itemları sağa hizala */
+    /* Dropdown içindeki container: itemları ortada gruplandır */
     .fx-main-nav .fx-dd > .container {
         display: flex;
         flex-wrap: wrap;
         gap: .25rem 1.5rem;
-        justify-content: flex-end;
+        justify-content: center;
     }
-    /* Geniş (fx-dd--wide) dropdown için 2 kolon grid — sağa hizalı */
+    /* Geniş (fx-dd--wide) dropdown için çok kolonlu grid — ortada */
     .fx-main-nav .fx-dd--wide > .container {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: .25rem .75rem;
-        max-width: 60%;
+        max-width: 70%;
         margin-left: auto;
-        margin-right: 0;
+        margin-right: auto;
     }
 }
 
@@ -494,6 +511,18 @@ div.fx-card-img {
     margin-top: 2rem;
     padding-top: 1.5rem;
     font-size: 0.8rem;
+}
+
+/* Sütun link hover animasyonu — sadece .fx-footer-link sınıflı linkler */
+.fx-footer .fx-footer-link {
+    display: inline-block;
+    color: #e5e7eb !important;
+    transition: color .2s, transform .2s;
+    will-change: transform;
+}
+.fx-footer .fx-footer-link:hover {
+    color: var(--flexion-red) !important;
+    transform: translateY(-2px);
 }
 
 /* ===================================================

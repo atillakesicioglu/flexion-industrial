@@ -499,13 +499,25 @@ div.fx-card-img {
     color: #9ca3af;
     padding-top: 3rem;
 }
-/* !important: a:not(.btn):... seçicisinin yüksek specificity'sini ezer */
+/* Genel footer link stili (sosyal ikonlar vb.) */
 .fx-footer a {
-    color: #e5e7eb !important;
+    color: #e5e7eb;
     text-decoration: none;
-    transition: color .2s;
 }
-.fx-footer a:hover { color: #ffffff !important; }
+.fx-footer a:hover {
+    color: #ffffff;
+}
+
+/* Başlık altı linkler (fx-footer-link) için özel hover */
+.fx-footer .fx-footer-link {
+    display: inline-block;
+    color: #e5e7eb;
+    transition: color .18s ease, transform .18s ease;
+}
+.fx-footer .fx-footer-link:hover {
+    color: var(--flexion-red);
+    transform: translateY(-2px);
+}
 .fx-footer-bottom {
     border-top: 1px solid #1f2937;
     margin-top: 2rem;

@@ -120,7 +120,15 @@ if (empty($sections)) {
                         <h1 class="display-5 fw-bold mb-3"><?= e($section['title'] ?? ($c['title'] ?? 'Industrial Cable Solutions')) ?></h1>
                         <p class="lead mb-4"><?= e($c['subtitle'] ?? '') ?></p>
                         <?php if (!empty($c['button_text'])): ?>
-                            <a href="<?= e($c['button_url'] ?? '#') ?>" class="btn btn-primary btn-lg">
+                            <?php
+                            $btnUrl = $c['button_url'] ?? '#';
+                            if ($btnUrl === 'categories' || $btnUrl === 'sectors' || $btnUrl === '/categories') {
+                                $btnUrl = categories_list_url();
+                            } elseif ($btnUrl !== '' && $btnUrl !== '#') {
+                                $btnUrl = localized_url($btnUrl);
+                            }
+                            ?>
+                            <a href="<?= e($btnUrl) ?>" class="btn btn-primary btn-lg">
                                 <?= e($c['button_text']) ?>
                             </a>
                         <?php endif; ?>

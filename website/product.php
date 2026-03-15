@@ -210,7 +210,7 @@ try {
                 <!-- Ana görsel -->
                 <?php if (!empty($product['main_image'])): ?>
                     <img id="main-product-img"
-                         src="<?= e($product['main_image']) ?>"
+                         src="<?= e(asset_url($product['main_image'])) ?>"
                          alt="<?= e($product['name']) ?>"
                          class="img-fluid rounded-3 shadow-sm w-100"
                          style="max-height:380px;object-fit:contain;background:#f8f9fa;">
@@ -224,13 +224,13 @@ try {
                 <?php if (!empty($extraImages) || !empty($product['main_image'])): ?>
                     <div class="d-flex gap-2 mt-3 flex-wrap">
                         <?php if (!empty($product['main_image'])): ?>
-                            <img src="<?= e($product['main_image']) ?>"
+                            <img src="<?= e(asset_url($product['main_image'])) ?>"
                                  height="56" class="rounded border gallery-thumb"
                                  style="cursor:pointer;object-fit:cover;width:56px;"
                                  onclick="document.getElementById('main-product-img').src=this.src">
                         <?php endif; ?>
                         <?php foreach ($extraImages as $eImg): ?>
-                            <img src="<?= e($eImg['image']) ?>"
+                            <img src="<?= e(asset_url($eImg['image'])) ?>"
                                  height="56" class="rounded border gallery-thumb"
                                  style="cursor:pointer;object-fit:cover;width:56px;"
                                  loading="lazy"
@@ -249,7 +249,7 @@ try {
                             <?php foreach ($regulations as $reg): ?>
                                 <span class="fx-regulation-badge">
                                     <?php if (!empty($reg['icon'])): ?>
-                                        <img src="<?= e($reg['icon']) ?>" alt="<?= e($reg['title']) ?>">
+                                        <img src="<?= e(asset_url($reg['icon'])) ?>" alt="<?= e($reg['title']) ?>">
                                     <?php endif; ?>
                                     <?= e($reg['title']) ?>
                                 </span>
@@ -289,7 +289,7 @@ try {
                 <?php if (!empty($documents)): ?>
                     <div class="d-flex flex-wrap gap-2 mb-4">
                         <?php foreach ($documents as $doc): ?>
-                            <a href="<?= e($doc['file_path']) ?>" target="_blank" rel="noopener"
+                            <a href="<?= e(asset_url($doc['file_path'])) ?>" target="_blank" rel="noopener"
                                class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
                                 <i class="bi bi-file-earmark-arrow-down"></i>
                                 <?= e($doc['title']) ?>
@@ -353,7 +353,7 @@ try {
                     <a href="product?id=<?= e((string) $rp['id']) ?>"
                        class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                         <?php if (!empty($rp['main_image'])): ?>
-                            <img src="<?= e($rp['main_image']) ?>" class="card-img-top fx-card-img" alt="<?= e($rp['name']) ?>" loading="lazy">
+                            <img src="<?= e(asset_url($rp['main_image'])) ?>" class="card-img-top fx-card-img" alt="<?= e($rp['name']) ?>" loading="lazy">
                         <?php else: ?>
                             <div class="fx-card-img bg-light d-flex align-items-center justify-content-center text-muted">
                                 <i class="bi bi-box-seam fs-2"></i>

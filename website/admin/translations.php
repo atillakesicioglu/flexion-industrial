@@ -53,6 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         $success = $saved . ' çeviri kaydedildi.';
+        $hash = isset($_POST['active_tab']) && preg_match('/^tr-group-[a-z0-9\-]+$/i', $_POST['active_tab']) ? $_POST['active_tab'] : 'tr-group-Genel';
+        set_flash('translations_success', $success);
+        header('Location: translations.php#' . $hash);
+        exit;
     } elseif (isset($_POST['add_key'])) {
         $newKey = trim($_POST['new_key'] ?? '');
         $newGroup = trim($_POST['new_group'] ?? '') ?: 'Genel';
@@ -66,6 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } catch (Throwable $e) {}
             }
             $success = '"' . htmlspecialchars($newKey) . '" anahtarı eklendi.';
+            set_flash('translations_success', $success);
+            header('Location: translations.php#add-key-section');
+            exit;
         } else {
             $error = 'Anahtar sadece küçük harf, rakam ve alt çizgi içerebilir.';
         }
@@ -90,6 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         $success = "Footer: {$flSaved} çeviri kaydedildi.";
+        set_flash('translations_success', $success);
+        header('Location: translations.php#footer-link-translations');
+        exit;
     }
 }
 
@@ -114,16 +124,21 @@ include __DIR__ . '/partials_header.php';
     <a href="#add-key-section" class="btn btn-sm btn-outline-primary">+ Yeni Anahtar</a>
 </div>
 
-<?php if ($error): ?>
-    <div class="alert alert-danger py-2"><?= $error ?></div>
+<?php
+$showError   = $error ?: get_flash('translations_error');
+$showSuccess = $success ?: get_flash('translations_success');
+?>
+<?php if ($showError): ?>
+    <div class="alert alert-danger py-2"><?= $showError ?></div>
 <?php endif; ?>
-<?php if ($success): ?>
-    <div class="alert alert-success py-2"><?= $success ?></div>
+<?php if ($showSuccess): ?>
+    <div class="alert alert-success py-2"><?= $showSuccess ?></div>
 <?php endif; ?>
 
-<form method="post">
+<form method="post" id="translations-main-form">
     <input type="hidden" name="csrf_token" value="<?= e($token) ?>">
     <input type="hidden" name="save_translations" value="1">
+    <input type="hidden" name="active_tab" id="active_tab" value="tr-group-Genel">
 
     <!-- Grup sekmeleri -->
     <ul class="nav nav-tabs mb-3" role="tablist">
@@ -249,7 +264,7 @@ try {
 ?>
 
 <?php if (!empty($footerLinksAll)): ?>
-<div class="card border-0 shadow-sm mt-4">
+<div class="card border-0 shadow-sm mt-4" id="footer-link-translations">
     <div class="card-header bg-white"><strong>Footer Link Çevirileri</strong></div>
     <div class="card-body p-0">
         <form method="post">
@@ -292,5 +307,35 @@ try {
     </div>
 </div>
 <?php endif; ?>
+
+<script>
+(function () {
+    var form = document.getElementById('translations-main-form');
+    var activeTabInput = document.getElementById('active_tab');
+    if (!form || !activeTabInput) return;
+
+    // Tab gösterildiğinde hidden input güncelle (kaydet sonrası doğru sekmede kalınsın)
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (btn) {
+        btn.addEventListener('shown.bs.tab', function (e) {
+            var target = e.target.getAttribute('data-bs-target');
+            if (target && target.charAt(0) === '#') {
+                activeTabInput.value = target.slice(1);
+            }
+        });
+    });
+
+    // Sayfa hash ile yüklendiyse (redirect sonrası) ilgili sekmeyi aç
+    if (window.location.hash) {
+        var tabBtn = document.querySelector('[data-bs-target="' + window.location.hash + '"]');
+        if (tabBtn) {
+            tabBtn.click();
+            // İsteğe bağlı: scroll'u yumuşak tut, sadece mesaj görünsün diye hafifçe yukarı kaydırma
+            setTimeout(function () {
+                document.querySelector('.alert-success') && document.querySelector('.alert-success').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+    }
+})();
+</script>
 
 <?php include __DIR__ . '/partials_footer.php'; ?>

@@ -12,6 +12,18 @@ function e(?string $value): string
 }
 
 /**
+ * Asset (CSS, JS, upload) URL'lerini her zaman site köküne göre verir.
+ * Dil prefix'li sayfalarda (/de/...) göreli yollar 404 verdiği için root-relative gerekir.
+ */
+function asset_url(?string $path): string
+{
+    if ($path === null || $path === '') {
+        return '/';
+    }
+    return '/' . ltrim($path, '/');
+}
+
+/**
  * Admin tarafından girilen HTML içeriğini tehlikeli etiketlerden arındırır.
  * WYSIWYG çıktıları için: script, iframe, form vb. kaldırılır,
  * normal içerik etiketleri (p, strong, img, a …) korunur.
@@ -403,7 +415,7 @@ function render_news_banner(): void
     $alignClass  = $alignMap[$titlePos] ?? 'text-center';
     ?>
     <section class="fx-page-banner mb-0">
-        <div class="fx-banner-bg" style="background-image:url('<?= e($bannerImg) ?>');
+        <div class="fx-banner-bg" style="background-image:url('<?= e(asset_url($bannerImg)) ?>');
              filter:blur(<?= $blur ?>px); transform:scale(1.05);"></div>
         <div class="fx-banner-overlay" style="background:rgba(0,0,0,<?= round($opacity / 100, 2) ?>);"></div>
         <div class="fx-banner-content">

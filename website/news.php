@@ -61,7 +61,7 @@ if ($slug) {
                         </p>
                     <?php endif; ?>
                     <?php if (!empty($article['image'])): ?>
-                        <img src="<?= e($article['image']) ?>" alt="<?= e($article['title']) ?>" class="img-fluid rounded-3 mb-4">
+                        <img src="<?= e(asset_url($article['image'])) ?>" alt="<?= e($article['title']) ?>" class="img-fluid rounded-3 mb-4">
                     <?php endif; ?>
                     <div class="text-muted small">
                         <?= sanitize_html($article['content']) ?>
@@ -129,7 +129,7 @@ try {
                 <div class="col-md-4 fx-animate">
                     <a href="news/<?= e($nListSlug) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                 <?php if (!empty($news['image'])): ?>
-                    <img src="<?= e($news['image']) ?>" class="card-img-top fx-card-img" alt="<?= e($nListTitle) ?>" loading="lazy">
+                    <img src="<?= e(asset_url($news['image'])) ?>" class="card-img-top fx-card-img" alt="<?= e($nListTitle) ?>" loading="lazy">
                 <?php else: ?>
                             <div class="fx-card-img bg-light d-flex align-items-center justify-content-center text-muted">
                                 <i class="bi bi-newspaper fs-2"></i>

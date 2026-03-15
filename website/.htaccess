@@ -41,6 +41,9 @@ Options -Indexes
     #     Router'a ilet; dil kodu $_GET['lang'] olarak geçilir.
     # ===================================================================
 
+    # Sadece dil kodu: /de, /de/, /fr, /it → ana sayfa
+    RewriteRule ^(de|fr|it)/?$ index.php?lang=$1 [L,QSA]
+
     # /de/haberler/haber-slug → news slug
     RewriteRule ^(de|fr|it)/haberler/([a-z0-9][a-z0-9\-\._%]*)/?$ news.php?slug=$2&lang=$1 [L,QSA]
     RewriteRule ^haberler/([a-z0-9][a-z0-9\-\._%]*)/?$ news.php?slug=$1 [L,QSA]

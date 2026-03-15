@@ -148,7 +148,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
 
 <?php if ($bannerImg): ?>
 <section class="fx-page-banner mb-0">
-    <div class="fx-banner-bg" style="background-image:url('<?= e($bannerImg) ?>');
+    <div class="fx-banner-bg" style="background-image:url('<?= e(asset_url($bannerImg)) ?>');
          filter:blur(<?= $bBlur ?>px); transform:scale(1.05);"></div>
     <div class="fx-banner-overlay" style="background:rgba(0,0,0,<?= round($bOpacity/100,2) ?>);"></div>
     <div class="fx-banner-content">

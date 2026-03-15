@@ -55,7 +55,13 @@ function _i18n_detect_lang(): string {
         return $cookie;
     }
 
-    // 3. Accept-Language
+    // 3. GET (rewrite: /de/ → index.php?lang=de)
+    $getLang = $_GET['lang'] ?? '';
+    if ($getLang && in_array($getLang, SUPPORTED_LANGS, true)) {
+        return $getLang;
+    }
+
+    // 4. Accept-Language
     $accept = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
     if ($accept) {
         foreach (explode(',', $accept) as $entry) {
@@ -67,5 +73,6 @@ function _i18n_detect_lang(): string {
         }
     }
 
+    // 5. Varsayılan
     return DEFAULT_LANG;
 }

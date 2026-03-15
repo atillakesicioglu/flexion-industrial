@@ -103,7 +103,7 @@ if (empty($sections)) {
         <section class="<?= $sectionCl ?>">
             <?php if ($isCover): ?>
                 <?php
-                $bgImgEsc    = htmlspecialchars($imgSrc, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                $bgImgEsc    = htmlspecialchars(asset_url($imgSrc), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
                 $bgStyle     = "background-image:url('{$bgImgEsc}');";
                 if ($imageBlur > 0) {
                     $bgStyle .= "filter:blur({$imageBlur}px);";
@@ -128,7 +128,7 @@ if (empty($sections)) {
                     <?php if (!$isCover): ?>
                         <div class="col-lg-6 text-center">
                             <?php if ($imgSrc): ?>
-                                <img src="<?= e($imgSrc) ?>" alt="" class="img-fluid rounded-3 shadow-lg">
+                                <img src="<?= e(asset_url($imgSrc)) ?>" alt="" class="img-fluid rounded-3 shadow-lg">
                             <?php else: ?>
                                 <div class="bg-dark bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center" style="min-height:280px;">
                                     <span class="text-white-50 small"><?= e(t('home_upload_image', 'Upload image (Admin → Home Sections)')) ?></span>
@@ -164,7 +164,7 @@ if (empty($sections)) {
                         <div class="col-6 col-md-3">
                             <a href="<?= e($_cHref) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                                 <?php if (!empty($cat['image'])): ?>
-                                    <img src="<?= e($cat['image']) ?>" class="card-img-top" style="height:140px;object-fit:cover;" alt="<?= e($_cName) ?>">
+                                    <img src="<?= e(asset_url($cat['image'])) ?>" class="card-img-top" style="height:140px;object-fit:cover;" alt="<?= e($_cName) ?>">
                                 <?php else: ?>
                                     <div class="bg-secondary-subtle d-flex align-items-center justify-content-center" style="height:140px;">
                                         <i class="bi bi-grid fs-2 text-muted"></i>
@@ -210,7 +210,7 @@ if (empty($sections)) {
                     </div>
                     <div class="col-md-<?= $imgCol ?>">
                         <?php if ($imgSrc): ?>
-                            <img src="<?= e($imgSrc) ?>" alt="" class="img-fluid rounded-3 shadow-sm">
+                            <img src="<?= e(asset_url($imgSrc)) ?>" alt="" class="img-fluid rounded-3 shadow-sm">
                         <?php endif; ?>
                     </div>
                 </div>
@@ -241,7 +241,7 @@ if (empty($sections)) {
                         <div class="col-md-4">
                             <a href="<?= e($_nHref) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                                 <?php if (!empty($news['image'])): ?>
-                                    <img src="<?= e($news['image']) ?>" class="card-img-top" style="height:180px;object-fit:cover;" alt="<?= e($_nTitle) ?>">
+                                    <img src="<?= e(asset_url($news['image'])) ?>" class="card-img-top" style="height:180px;object-fit:cover;" alt="<?= e($_nTitle) ?>">
                                 <?php endif; ?>
                                 <div class="card-body">
                                     <h3 class="h6 mb-2"><?= e($_nTitle) ?></h3>

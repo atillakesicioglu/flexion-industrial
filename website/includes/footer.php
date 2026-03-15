@@ -70,7 +70,7 @@ foreach ($footerLinksRaw as $fl) {
             <div class="col-md-4 col-lg-3">
                 <?php if ($logoPath): ?>
                     <a href="/" class="d-inline-block mb-3">
-                        <img src="<?= e($logoPath) ?>" alt="<?= e($siteTitle) ?>"
+                        <img src="<?= e(asset_url($logoPath)) ?>" alt="<?= e($siteTitle) ?>"
                              height="<?= $logoHeight ?>" style="max-height:<?= $logoHeight ?>px;filter:brightness(0) invert(1);">
                     </a>
                 <?php else: ?>

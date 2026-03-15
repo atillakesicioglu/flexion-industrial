@@ -28,7 +28,7 @@ $activeCategoryId = 0;
                         <div class="col-6 col-md-4 fx-animate">
                             <a href="category?id=<?= e((string) $cat['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark overflow-hidden">
                                 <?php if (!empty($cat['image'])): ?>
-                                    <img src="<?= e($cat['image']) ?>" class="card-img-top fx-card-img" alt="<?= e($cat['name']) ?>" loading="lazy">
+                                    <img src="<?= e(asset_url($cat['image'])) ?>" class="card-img-top fx-card-img" alt="<?= e($cat['name']) ?>" loading="lazy">
                                 <?php else: ?>
                                     <div class="fx-card-img bg-light text-muted">
                                         <i class="bi bi-image fs-2"></i>

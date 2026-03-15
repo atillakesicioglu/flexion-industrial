@@ -45,7 +45,7 @@ $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr'
     <?php endif; ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="<?= e(asset_url('assets/css/main.css')) ?>">
 </head>
 <body>
 <!-- Topbar -->
@@ -63,7 +63,7 @@ $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr'
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="/">
             <?php if ($logoPath): ?>
-                <img src="<?= e($logoPath) ?>" alt="<?= e($siteTitle) ?>" height="<?= $logoHeight ?>" class="me-2">
+                <img src="<?= e(asset_url($logoPath)) ?>" alt="<?= e($siteTitle) ?>" height="<?= $logoHeight ?>" class="me-2">
             <?php endif; ?>
             <?php if (get_setting('show_header_title', '1') === '1'): ?>
             <span class="fx-header-logo">FLEXION</span>
@@ -161,7 +161,7 @@ $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr'
     <div class="fx-mobile-overlay-head">
         <a href="/" class="text-decoration-none d-flex align-items-center gap-2" onclick="closeMobileMenu()">
             <?php if ($logoPath): ?>
-                <img src="<?= e($logoPath) ?>" alt="<?= e($siteTitle) ?>" height="32" style="filter:brightness(0) invert(1);">
+                <img src="<?= e(asset_url($logoPath)) ?>" alt="<?= e($siteTitle) ?>" height="32" style="filter:brightness(0) invert(1);">
             <?php endif; ?>
             <?php if (get_setting('show_header_title', '1') === '1'): ?>
             <span class="fw-bold text-white fs-5 letter-spacing-1">FLEXION</span>

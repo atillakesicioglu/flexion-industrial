@@ -33,6 +33,14 @@ function nav_is_active(string $url): bool {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($siteTitle) ?></title>
     <meta name="description" content="<?= e(get_setting('meta_description', 'Flexion industrial hose and cable solutions')) ?>">
+    <!-- Open Graph / Social sharing -->
+    <meta property="og:type"        content="website">
+    <meta property="og:title"       content="<?= e($siteTitle) ?>">
+    <meta property="og:description" content="<?= e(get_setting('meta_description', 'Flexion industrial hose and cable solutions')) ?>">
+    <meta property="og:url"         content="<?= e((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? '') . ($_SERVER['REQUEST_URI'] ?? '/')) ?>">
+    <?php $ogImage = get_setting('og_image', ''); if ($ogImage): ?>
+    <meta property="og:image"       content="<?= e($ogImage) ?>">
+    <?php endif; ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/main.css">

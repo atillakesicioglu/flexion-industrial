@@ -117,7 +117,7 @@ foreach ($footerLinksRaw as $fl) {
             </div>
         </div>
 
-        <div class="fx-footer-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="fx-footer-bottom d-flex flex-column flex-sm-row justify-content-sm-between align-items-center gap-2">
             <span class="small text-white"><?= e($footerText) ?></span>
             <span class="small text-white">
                 Powered by <a href="https://kesicioglu.com" target="_blank" rel="noopener" class="fw-bold text-white text-decoration-none">Kesicioglu</a>
@@ -164,17 +164,19 @@ foreach ($footerLinksRaw as $fl) {
     var els = document.querySelectorAll('.fx-animate');
     if (!els.length) return;
     var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry, i) {
+        entries.forEach(function (entry) {
             if (entry.isIntersecting) {
                 var el = entry.target;
-                var delay = (el.dataset.delay || 0);
+                var delay = parseInt(el.dataset.delay || 0, 10);
                 setTimeout(function () { el.classList.add('fx-visible'); }, delay);
                 io.unobserve(el);
             }
         });
     }, { threshold: 0.12 });
+    // Mobilde gecikmeyi sınırla (maks 150ms) — masaüstünde 300ms
+    var maxDelay = window.innerWidth < 768 ? 150 : 300;
     els.forEach(function (el, i) {
-        if (!el.dataset.delay) el.dataset.delay = i * 60;
+        if (!el.dataset.delay) el.dataset.delay = Math.min(i * 60, maxDelay);
         io.observe(el);
     });
 }());

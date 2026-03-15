@@ -287,9 +287,11 @@ a.text-dark:hover { color: var(--flexion-red) !important; }
     }
 }
 
-/* 4+ çocuk için geniş görünüm (mobil fallback) */
-.fx-main-nav .fx-dd--wide {
-    min-width: 380px;
+/* 4+ çocuk için geniş görünüm — sadece masaüstünde min-width */
+@media (min-width: 992px) {
+    .fx-main-nav .fx-dd--wide {
+        min-width: 380px;
+    }
 }
 
 .fx-main-nav .fx-dd .dropdown-item {
@@ -298,7 +300,13 @@ a.text-dark:hover { color: var(--flexion-red) !important; }
     color: #374151;
     border-radius: 4px;
     transition: background-color .15s, color .15s;
-    white-space: nowrap;
+    white-space: nowrap; /* masaüstünde tek satır */
+}
+/* Mobilde dropdown item'lar normal text wrap yapsın */
+@media (max-width: 991.98px) {
+    .fx-main-nav .fx-dd .dropdown-item {
+        white-space: normal;
+    }
 }
 .fx-main-nav .fx-dd .dropdown-item:hover,
 .fx-main-nav .fx-dd .dropdown-item:focus {
@@ -412,13 +420,16 @@ div.fx-card-img {
 
 /* ===================================================
    Kart Hover Animasyonu
+   Sadece gerçek hover desteği olan cihazlarda (touch ekranlarda yapışmaz)
    =================================================== */
 .card {
     transition: transform .25s ease, box-shadow .25s ease;
 }
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(0,0,0,.12) !important;
+@media (hover: hover) {
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0,0,0,.12) !important;
+    }
 }
 
 /* ===================================================
@@ -531,16 +542,6 @@ div.fx-card-img {
     color: #ffffff;
 }
 
-/* Başlık altı linkler (fx-footer-link) için özel hover */
-.fx-footer .fx-footer-link {
-    display: inline-block;
-    color: #e5e7eb;
-    transition: color .18s ease, transform .18s ease;
-}
-.fx-footer .fx-footer-link:hover {
-    color: var(--flexion-red);
-    transform: translateY(-2px);
-}
 .fx-footer-bottom {
     border-top: 1px solid #1f2937;
     margin-top: 2rem;
@@ -548,11 +549,11 @@ div.fx-card-img {
     font-size: 0.8rem;
 }
 
-/* Sütun link hover animasyonu — sadece .fx-footer-link sınıflı linkler */
+/* Başlık altı linkler için hover: renk + hafif yukarı kalkma */
 .fx-footer .fx-footer-link {
     display: inline-block;
     color: #e5e7eb !important;
-    transition: color .2s, transform .2s;
+    transition: color .18s ease, transform .18s ease;
     will-change: transform;
 }
 .fx-footer .fx-footer-link:hover {
@@ -737,5 +738,45 @@ div.fx-card-img {
     .fx-main-nav .nav-link {
         padding-top: 0.35rem;
         padding-bottom: 0.35rem;
+    }
+
+    /* Mobil menü açılış animasyonu — GPU'ya taşı, akıcı yap */
+    .navbar-collapse.collapsing {
+        transition: height .2s ease !important;
+        will-change: height;
+    }
+
+    /* İletişim haritası mobilde çok uzun kalmasın */
+    .fx-map-wrap {
+        height: 280px !important;
+    }
+
+    /* Footer alt satır: küçük ekranda üst üste + ortalı */
+    .fx-footer-bottom {
+        flex-direction: column !important;
+        text-align: center;
+        gap: .4rem;
+        padding-bottom: 1rem;
+    }
+}
+
+/* Erişilebilirlik: hareket azaltma tercihi */
+@media (prefers-reduced-motion: reduce) {
+    .fx-animate,
+    .fx-animate.fx-visible {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    .navbar-collapse.collapsing {
+        transition: none !important;
+    }
+    .card {
+        transition: none !important;
+    }
+    .fx-footer .fx-footer-link,
+    .fx-main-nav .nav-link,
+    .fx-main-nav .nav-link::after {
+        transition: none !important;
     }
 }

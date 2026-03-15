@@ -100,9 +100,9 @@ try {
             <?php foreach ($items as $news): ?>
                 <div class="col-md-4 fx-animate">
                     <a href="news?slug=<?= e($news['slug']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
-                        <?php if (!empty($news['image'])): ?>
-                            <img src="<?= e($news['image']) ?>" class="card-img-top fx-card-img" alt="<?= e($news['title']) ?>">
-                        <?php else: ?>
+                <?php if (!empty($news['image'])): ?>
+                    <img src="<?= e($news['image']) ?>" class="card-img-top fx-card-img" alt="<?= e($news['title']) ?>" loading="lazy">
+                <?php else: ?>
                             <div class="fx-card-img bg-light d-flex align-items-center justify-content-center text-muted">
                                 <i class="bi bi-newspaper fs-2"></i>
                             </div>

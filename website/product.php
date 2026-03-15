@@ -198,6 +198,7 @@ try {
                             <img src="<?= e($eImg['image']) ?>"
                                  height="56" class="rounded border gallery-thumb"
                                  style="cursor:pointer;object-fit:cover;width:56px;"
+                                 loading="lazy"
                                  onclick="document.getElementById('main-product-img').src=this.src">
                         <?php endforeach; ?>
                     </div>
@@ -317,7 +318,7 @@ try {
                     <a href="product?id=<?= e((string) $rp['id']) ?>"
                        class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                         <?php if (!empty($rp['main_image'])): ?>
-                            <img src="<?= e($rp['main_image']) ?>" class="card-img-top fx-card-img" alt="<?= e($rp['name']) ?>">
+                            <img src="<?= e($rp['main_image']) ?>" class="card-img-top fx-card-img" alt="<?= e($rp['name']) ?>" loading="lazy">
                         <?php else: ?>
                             <div class="fx-card-img bg-light d-flex align-items-center justify-content-center text-muted">
                                 <i class="bi bi-box-seam fs-2"></i>

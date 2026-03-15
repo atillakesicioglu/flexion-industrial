@@ -277,7 +277,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
             <div class="col-lg-6 fx-animate" data-delay="120">
                 <?php $mapsEmbed = get_setting('google_maps_embed', ''); ?>
                 <?php if ($mapsEmbed): ?>
-                    <div style="border-radius:1rem;overflow:hidden;height:500px;">
+                    <div class="fx-map-wrap" style="border-radius:1rem;overflow:hidden;height:500px;">
                     <?php if (stripos(trim($mapsEmbed), '<iframe') === 0): ?>
                         <?php
                         $mapsEmbed = preg_replace('/width="[^"]*"/', 'width="100%"', $mapsEmbed);
@@ -294,7 +294,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
                     <?php endif; ?>
                     </div>
                 <?php else: ?>
-                    <div class="bg-light rounded-4 d-flex align-items-center justify-content-center" style="height:500px;">
+                    <div class="fx-map-wrap bg-light rounded-4 d-flex align-items-center justify-content-center" style="height:500px;">
                         <div class="text-center text-muted">
                             <i class="bi bi-map fs-1 mb-3 d-block"></i>
                             <p class="small">Google Maps haritası admin panelinden<br>

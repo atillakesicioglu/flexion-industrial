@@ -33,8 +33,8 @@ function home_url(): string {
 
 // ── İç linki seçili dile göre prefix'le ────────────────────────────────────
 // Harici URL'ler (http/https ile başlayanlar) değişmeden döner.
+// Ana sayfa (index.php, /index.php, /) → her zaman home_url() (temiz URL: / veya /de/).
 // Zaten dil prefix'i olan yollar (/de/...) değişmeden döner.
-// Boş link, '#' veya sadece '/' için olduğu gibi döner.
 // Diğer tüm iç linklere CURRENT_LANG prefix'i eklenir.
 function localized_url(string $url): string {
     if ($url === '' || $url === '#' || $url === '/') {
@@ -42,6 +42,15 @@ function localized_url(string $url): string {
     }
     if (preg_match('#^https?://#i', $url)) {
         return $url;
+    }
+    // Ana sayfa: index.php, /index.php, index, /index → temiz ana sayfa URL'i (/ veya /de/)
+    $path = parse_url($url, PHP_URL_PATH);
+    if ($path !== null && $path !== '') {
+        $path = trim($path, '/');
+        $base = $path !== '' ? strtolower(pathinfo($path, PATHINFO_FILENAME)) : '';
+        if ($path === '' || $path === 'index' || $path === 'index.php' || $base === 'index') {
+            return home_url();
+        }
     }
     $prefix = lang_prefix();
     if ($prefix === '') {

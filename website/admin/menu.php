@@ -83,8 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int) ($_POST['id'] ?? 0);
             if ($id > 0) {
                 try {
-                    $stmt = $pdo->prepare('DELETE FROM menu_items WHERE id = :id OR parent_id = :id');
-                    $stmt->execute([':id' => $id]);
+                    $stmt = $pdo->prepare('DELETE FROM menu_items WHERE id = :id1 OR parent_id = :id2');
+                    $stmt->execute([':id1' => $id, ':id2' => $id]);
                     $success = 'Menü öğesi (ve varsa altları) silindi.';
                 } catch (Throwable $e) {
                     error_log('[menu.php delete_item] ' . $e->getMessage());

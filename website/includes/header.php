@@ -71,7 +71,7 @@ $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr'
         </a>
 
         <!-- Burger: mobilde tam ekran overlay'i açar -->
-        <button class="navbar-toggler" type="button" id="fxBurger" aria-label="Menüyü aç" aria-expanded="false" aria-controls="fxMobileOverlay">
+        <button class="navbar-toggler" type="button" id="fxBurger" aria-label="<?= e(t('nav_open_menu', 'Open menu')) ?>" aria-expanded="false" aria-controls="fxMobileOverlay">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -172,7 +172,7 @@ $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr'
             <span class="fw-bold text-white fs-5 letter-spacing-1">FLEXION</span>
             <?php endif; ?>
         </a>
-        <button class="fx-mobile-close-btn" id="fxMobileClose" aria-label="Menüyü kapat" type="button">
+        <button class="fx-mobile-close-btn" id="fxMobileClose" aria-label="<?= e(t('nav_close_menu', 'Close menu')) ?>" type="button">
             <i class="bi bi-x-lg"></i>
         </button>
     </div>
@@ -214,7 +214,7 @@ $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr'
 
     <!-- Dil seçimi (mobil overlay içinde) -->
     <div class="px-4 py-3 border-top" style="border-color:rgba(255,255,255,.08)!important; flex-shrink:0;">
-        <p class="small text-secondary mb-2 text-uppercase fw-semibold" style="font-size:.7rem;">Dil / Language</p>
+        <p class="small text-secondary mb-2 text-uppercase fw-semibold" style="font-size:.7rem;"><?= e(t('nav_language', 'Language')) ?></p>
         <div class="d-flex gap-2 flex-wrap">
             <?php foreach (SUPPORTED_LANGS as $_ml): ?>
                 <a href="<?= e(lang_switch_url($_ml)) ?>"

@@ -44,12 +44,13 @@ if (!empty($footerLinksRaw)) {
     }
 }
 
+// Footer column labels: default to English (no Turkish on front)
+$footerColEn = ['kurumsal' => 'Corporate', 'iletisim' => 'Contact', 'urunler' => 'Products', 'contact' => 'Contact', 'products' => 'Products', 'corporate' => 'Corporate', 'iletişim' => 'Contact', 'ürünler' => 'Products', 'bize_ulasin' => 'Get in Touch'];
 $footerCols = [];
 foreach ($footerLinksRaw as $fl) {
     $colKey = $fl['column_key'];
     if (!isset($footerCols[$colKey])) {
-        // Sütun başlığı: site_translations'dan al, yoksa column_label
-        $colLabel = t('footer_col_' . $colKey, $fl['column_label'] ?: $colKey);
+        $colLabel = t('footer_col_' . $colKey, $footerColEn[mb_strtolower($colKey)] ?? (preg_match('/^[a-z]/', $colKey) ? ucfirst($colKey) : 'Links'));
         $footerCols[$colKey] = ['label' => $colLabel, 'links' => []];
     }
     // Link başlığını çevir
@@ -66,7 +67,7 @@ foreach ($footerLinksRaw as $fl) {
 <footer class="fx-footer text-light mt-5">
     <div class="container">
         <div class="row g-4 py-4">
-            <!-- Şirket bilgisi -->
+            <!-- Company info -->
             <div class="col-md-4 col-lg-3">
                 <?php if ($logoPath): ?>
                     <a href="<?= e(home_url()) ?>" class="d-inline-block mb-3">
@@ -91,7 +92,7 @@ foreach ($footerLinksRaw as $fl) {
                 <?php endif; ?>
             </div>
 
-            <!-- Dinamik link sütunları -->
+            <!-- Footer link columns -->
             <?php if (!empty($footerCols)): ?>
                 <?php foreach ($footerCols as $colData): ?>
                     <div class="col-6 col-md-2 col-lg-2">
@@ -108,7 +109,7 @@ foreach ($footerLinksRaw as $fl) {
                 <?php endforeach; ?>
             <?php endif; ?>
 
-            <!-- Sosyal medya / İletişim -->
+            <!-- Social media -->
             <div class="col-md-3 col-lg-3 ms-lg-auto">
                 <?php if ($linkedin || $youtube): ?>
                     <h6 class="text-white mb-3 fw-semibold"><?= e(t('footer_social_title', 'Social Media')) ?></h6>
@@ -124,10 +125,6 @@ foreach ($footerLinksRaw as $fl) {
                             </a>
                         <?php endif; ?>
                     </div>
-                <?php endif; ?>
-                <?php $newsletterText = t('footer_newsletter_label', get_setting('newsletter_text', '')); ?>
-                <?php if ($newsletterText): ?>
-                <p class="small mb-0"><?= e($newsletterText) ?></p>
                 <?php endif; ?>
             </div>
         </div>

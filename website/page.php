@@ -64,7 +64,7 @@ if ($page && $isContactPage
     }
 
     if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
-        $formError = 'Güvenlik doğrulaması başarısız. Lütfen sayfayı yenileyin ve tekrar deneyin.';
+        $formError = t('form_error_csrf', 'Security check failed. Please refresh and try again.');
     } else {
         $cName    = trim($_POST['contact_name']    ?? '');
         $cSurname = trim($_POST['contact_surname'] ?? '');
@@ -74,9 +74,9 @@ if ($page && $isContactPage
         $cMsg     = trim($_POST['contact_message'] ?? '');
 
         if (!$cName || !$cEmail2 || !$cMsg) {
-            $formError = 'Lütfen zorunlu alanları doldurun (Ad, E-posta, Mesaj).';
+            $formError = t('form_error_required', 'Please fill in the required fields (Name, Email, Message).');
         } elseif (!filter_var($cEmail2, FILTER_VALIDATE_EMAIL)) {
-            $formError = 'Geçerli bir e-posta adresi girin.';
+            $formError = t('form_error_email', 'Please enter a valid email address.');
         } else {
             $fullName = trim($cName . ' ' . $cSurname);
             try {
@@ -97,8 +97,8 @@ if ($page && $isContactPage
 
             $toMail = get_setting('contact_email', '');
             if ($toMail) {
-                $subj = 'Flexion İletişim: ' . $fullName;
-                $body = "Ad: $fullName\nE-posta: $cEmail2\nTelefon: $cPhone2\nŞirket: $cCompany\n\nMesaj:\n$cMsg";
+                $subj = 'Flexion Contact: ' . $fullName;
+                $body = "Name: $fullName\nEmail: $cEmail2\nPhone: $cPhone2\nCompany: $cCompany\n\nMessage:\n$cMsg";
                 send_notification_mail($toMail, $subj, $body);
             }
 
@@ -180,7 +180,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
         <?php else: ?>
 
         <!-- ================================================
-             İletişim Sayfası
+             Contact page
         ================================================ -->
         <div class="row g-5">
             <!-- Sol: Form + bilgiler -->
@@ -192,7 +192,7 @@ $textAlignClass = $textAlignMap[$bTitlePos] ?? 'text-center';
                     <div class="page-content mb-4"><?= sanitize_html($page['content']) ?></div>
                 <?php endif; ?>
 
-                <!-- İletişim bilgileri -->
+                <!-- Contact details -->
                 <?php
                 $cPhone   = get_setting('contact_phone', '');
                 $cEmail   = get_setting('contact_email', '');

@@ -385,18 +385,37 @@ function get_home_sections(): array
            ?? $translations[$id]['en']
            ?? null;
 
-        if ($tr) {
-            if (!empty($tr['title']))        $row['title']        = $tr['title'];
-            if (!empty($tr['content_json'])) $row['content_json'] = $tr['content_json'];
-        }
-
-        $row['content'] = [];
+        // Base içerik (görseller ve varsayılan metinler)
+        $baseContent = [];
         if (!empty($row['content_json'])) {
-            $data = json_decode($row['content_json'], true);
-            if (is_array($data)) {
-                $row['content'] = $data;
+            $decoded = json_decode($row['content_json'], true);
+            if (is_array($decoded)) {
+                $baseContent = $decoded;
             }
         }
+
+        // Çeviri varsa: sadece metin alanlarını override et, görselleri base'ten koru
+        $mergedContent = $baseContent;
+        if ($tr) {
+            if (!empty($tr['title'])) {
+                $row['title'] = $tr['title'];
+            }
+            if (!empty($tr['content_json'])) {
+                $trData = json_decode($tr['content_json'], true);
+                if (is_array($trData)) {
+                    $imageKeys = ['image', 'image_url', 'image_mode', 'image_opacity', 'image_blur', 'image_col'];
+                    foreach ($trData as $k => $v) {
+                        // Görsel anahtarları çeviriden geliyorsa ama boşsa, base'i ezme
+                        if (in_array($k, $imageKeys, true) && ($v === null || $v === '')) {
+                            continue;
+                        }
+                        $mergedContent[$k] = $v;
+                    }
+                }
+            }
+        }
+
+        $row['content'] = $mergedContent;
         $sections[] = $row;
     }
 

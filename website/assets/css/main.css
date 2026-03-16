@@ -420,7 +420,7 @@ div.fx-card-img {
 
 /* Ürün kart görseli — sabit alan, ortalanmış hortum */
 .fx-product-thumb {
-    background-color: #dce8f5;
+    background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -448,7 +448,7 @@ div.fx-card-img {
     justify-content: center;
     height: 200px;
     width: 100%;
-    background-color: #dce8f5;
+    background-color: #ffffff;
     color: #94a3b8;
     flex-shrink: 0;
 }
@@ -456,6 +456,34 @@ div.fx-card-img {
     .fx-product-thumb { height: 170px; }
     .fx-product-thumb-img { height: 120px; }
     .fx-product-thumb-placeholder { height: 170px; }
+}
+
+/* Ürün detay sayfası ana görsel alanı */
+.fx-product-main {
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
+}
+.fx-product-main-img {
+    max-width: 100%;
+    height: 220px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+@media (max-width: 767.98px) {
+    .fx-product-main {
+        min-height: 260px;
+        padding: 1.25rem;
+    }
+    .fx-product-main-img {
+        height: 190px;
+    }
 }
 
 /* ===================================================

@@ -204,19 +204,23 @@ try {
         </nav>
 
         <div class="row g-4 mb-5">
-            <!-- ═══════════ SOL: Görsel + Küçük resimler + Regülasyonlar ═══════════ -->
+            <!-- ═══════════ SOL: Ana görsel + Küçük resimler + Regülasyonlar ═══════════ -->
             <div class="col-md-5 fx-animate">
 
                 <!-- Ana görsel -->
                 <?php if (!empty($product['main_image'])): ?>
-                    <img id="main-product-img"
-                         src="<?= e(asset_url($product['main_image'])) ?>"
-                         alt="<?= e($product['name']) ?>"
-                         class="img-fluid rounded-3 shadow-sm w-100"
-                         style="max-height:380px;object-fit:contain;background:#f8f9fa;">
+                    <div class="fx-product-main">
+                        <img id="main-product-img"
+                             src="<?= e(asset_url($product['main_image'])) ?>"
+                             alt="<?= e($product['name']) ?>"
+                             class="fx-product-main-img">
+                    </div>
                 <?php else: ?>
-                    <div class="bg-light border rounded-3 d-flex align-items-center justify-content-center" style="min-height:280px;">
-                        <span class="text-muted small"><i class="bi bi-image fs-1 d-block mb-2 opacity-50"></i>Görsel eklenmemiş</span>
+                    <div class="fx-product-main">
+                        <span class="text-muted small text-center">
+                            <i class="bi bi-image fs-1 d-block mb-2 opacity-50"></i>
+                            <?= e(t('prod_no_image', 'No image uploaded')) ?>
+                        </span>
                     </div>
                 <?php endif; ?>
 

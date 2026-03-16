@@ -80,12 +80,18 @@ if ($q !== '') {
                         <div class="col-md-3 col-sm-6">
                             <a href="product?id=<?= e((string) $product['id']) ?>" class="card h-100 text-decoration-none text-dark border-0 shadow-sm">
                                 <?php if (!empty($product['main_image'])): ?>
-                                    <img src="<?= e($product['main_image']) ?>" class="card-img-top fx-product-img" alt="<?= e($product['name']) ?>">
+                                    <div class="fx-product-thumb">
+                                        <img src="<?= e($product['main_image']) ?>" class="fx-product-thumb-img" alt="<?= e($product['name']) ?>" loading="lazy">
+                                    </div>
+                                <?php else: ?>
+                                    <div class="fx-product-thumb-placeholder">
+                                        <i class="bi bi-box-seam fs-1"></i>
+                                    </div>
                                 <?php endif; ?>
                                 <div class="card-body py-3">
-                                    <h3 class="h6 mb-1"><?= e($product['name']) ?></h3>
+                                    <h3 class="h6 fw-semibold mb-1"><?= e($product['name']) ?></h3>
                                     <?php if (!empty($product['code'])): ?>
-                                        <p class="small text-muted mb-1">Kod: <?= e($product['code']) ?></p>
+                                        <p class="small text-muted mb-1"><?= e(t('prod_code_label', 'Code')) ?>: <?= e($product['code']) ?></p>
                                     <?php endif; ?>
                                     <p class="small text-muted mb-0"><?= e($product['short_description'] ?? '') ?></p>
                                 </div>

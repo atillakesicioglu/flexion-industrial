@@ -139,16 +139,18 @@ try {
                 <div class="row g-3">
                     <?php foreach ($products as $product): ?>
                         <div class="col-md-4 fx-animate">
-                            <a href="product?id=<?= e((string) $product['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark overflow-hidden">
+                            <a href="product?id=<?= e((string) $product['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                                 <?php if (!empty($product['main_image'])): ?>
-                                    <img src="<?= e(asset_url($product['main_image'])) ?>" class="card-img-top fx-card-img fx-product-img" alt="<?= e($product['name']) ?>" loading="lazy">
+                                    <div class="fx-product-thumb">
+                                        <img src="<?= e(asset_url($product['main_image'])) ?>" class="fx-product-thumb-img" alt="<?= e($product['name']) ?>" loading="lazy">
+                                    </div>
                                 <?php else: ?>
-                                    <div class="fx-card-img fx-product-img bg-light text-muted">
-                                        <i class="bi bi-box-seam fs-2"></i>
+                                    <div class="fx-product-thumb-placeholder">
+                                        <i class="bi bi-box-seam fs-1"></i>
                                     </div>
                                 <?php endif; ?>
                                 <div class="card-body py-3">
-                                    <h2 class="h6 mb-1"><?= e($product['name']) ?></h2>
+                                    <h2 class="h6 fw-semibold mb-1"><?= e($product['name']) ?></h2>
                                     <?php if (!empty($product['code'])): ?>
                                         <p class="small text-muted mb-1"><?= e(t('prod_code_label', 'Code')) ?>: <?= e($product['code']) ?></p>
                                     <?php endif; ?>

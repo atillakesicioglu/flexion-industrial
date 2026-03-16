@@ -353,16 +353,18 @@ try {
                     <a href="product?id=<?= e((string) $rp['id']) ?>"
                        class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                         <?php if (!empty($rp['main_image'])): ?>
-                            <img src="<?= e(asset_url($rp['main_image'])) ?>" class="card-img-top fx-card-img fx-product-img" alt="<?= e($rp['name']) ?>" loading="lazy">
+                            <div class="fx-product-thumb">
+                                <img src="<?= e(asset_url($rp['main_image'])) ?>" class="fx-product-thumb-img" alt="<?= e($rp['name']) ?>" loading="lazy">
+                            </div>
                         <?php else: ?>
-                            <div class="fx-card-img fx-product-img bg-light d-flex align-items-center justify-content-center text-muted">
-                                <i class="bi bi-box-seam fs-2"></i>
+                            <div class="fx-product-thumb-placeholder">
+                                <i class="bi bi-box-seam fs-1"></i>
                             </div>
                         <?php endif; ?>
                         <div class="card-body py-3">
-                            <h3 class="h6 mb-1"><?= e($rp['name']) ?></h3>
+                            <h3 class="h6 fw-semibold mb-1"><?= e($rp['name']) ?></h3>
                             <?php if (!empty($rp['code'])): ?>
-                                <p class="small text-muted mb-0">Kod: <?= e($rp['code']) ?></p>
+                                <p class="small text-muted mb-0"><?= e(t('prod_code_label', 'Code')) ?>: <?= e($rp['code']) ?></p>
                             <?php endif; ?>
                         </div>
                     </a>

@@ -418,14 +418,45 @@ div.fx-card-img {
     flex-shrink: 0;
 }
 
-/* Ürün kart görselleri: oran koruyan, tam görsel odaklı görünüm */
-.fx-product-img {
-    width: 100% !important;
-    height: auto !important;
-    max-height: 220px !important; /* kart yüksekliğini bozmayacak üst sınır */
-    object-fit: contain;          /* hortum görseli tamamen görünsün */
-    object-position: center;
-    background-color: #ffffff;
+/* Ürün kart görseli — IVG tarzı: açık arka plan + tam görsel */
+.fx-product-thumb {
+    background-color: #dce8f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    width: 100%;
+    padding: 1.25rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.fx-product-thumb-img {
+    max-width: 100%;
+    max-height: 160px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    transition: transform .25s ease;
+}
+.card:hover .fx-product-thumb-img {
+    transform: scale(1.04);
+}
+/* Görsel yoksa placeholder */
+.fx-product-thumb-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    width: 100%;
+    background-color: #dce8f5;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+@media (max-width: 767.98px) {
+    .fx-product-thumb { height: 170px; }
+    .fx-product-thumb-img { max-height: 130px; }
+    .fx-product-thumb-placeholder { height: 170px; }
 }
 
 /* ===================================================

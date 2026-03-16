@@ -418,11 +418,12 @@ div.fx-card-img {
     flex-shrink: 0;
 }
 
-/* Ürün kart görselleri: daha küçük ve oran koruyan görünüm */
+/* Ürün kart görselleri: oran koruyan, tam görsel odaklı görünüm */
 .fx-product-img {
-    height: 160px !important;
     width: 100% !important;
-    object-fit: contain;
+    height: auto !important;
+    max-height: 220px !important; /* kart yüksekliğini bozmayacak üst sınır */
+    object-fit: contain;          /* hortum görseli tamamen görünsün */
     object-position: center;
     background-color: #ffffff;
 }

@@ -19,9 +19,11 @@ $activeCategoryId = (int) ($activeCategoryId ?? 0);
 
         // Çeviriyi al
         $catTr   = get_translation('category_translations', 'category_id', $cid);
-        $catName = $catTr['name'] ?: $cat['name'];
-        $catSlug = $catTr['slug'] ?: ($cat['slug'] ?? '');
-        $catUrl  = $catSlug ? '/' . ltrim($catSlug, '/') : 'category?id=' . $cid;
+        $baseName = $cat['name'] ?? ($cat['title'] ?? '');
+        $baseSlug = $cat['slug'] ?? '';
+        $catName = (!empty($catTr) && !empty($catTr['name'])) ? $catTr['name'] : $baseName;
+        $catSlug = (!empty($catTr) && !empty($catTr['slug'])) ? $catTr['slug'] : $baseSlug;
+        $catUrl  = $catSlug ? localized_url('/' . ltrim($catSlug, '/')) : localized_url('category?id=' . $cid);
 
         // Bu item aktif mi veya aktif kategorinin ebeveyni mi?
         $isOpen = ($activeCategoryId > 0 && $cid === $activeCategoryId);
@@ -55,9 +57,11 @@ $activeCategoryId = (int) ($activeCategoryId ?? 0);
                 <div class="fx-cat-children">
                     <?php foreach ($cat['children'] as $child):
                         $childTr   = get_translation('category_translations', 'category_id', (int)$child['id']);
-                        $childName = $childTr['name'] ?: $child['name'];
-                        $childSlug = $childTr['slug'] ?: ($child['slug'] ?? '');
-                        $childUrl  = $childSlug ? '/' . ltrim($childSlug, '/') : 'category?id=' . (int)$child['id'];
+                        $childBaseName = $child['name'] ?? ($child['title'] ?? '');
+                        $childBaseSlug = $child['slug'] ?? '';
+                        $childName = (!empty($childTr) && !empty($childTr['name'])) ? $childTr['name'] : $childBaseName;
+                        $childSlug = (!empty($childTr) && !empty($childTr['slug'])) ? $childTr['slug'] : $childBaseSlug;
+                        $childUrl  = $childSlug ? localized_url('/' . ltrim($childSlug, '/')) : localized_url('category?id=' . (int)$child['id']);
                     ?>
                         <a href="<?= e($childUrl) ?>"
                            class="fx-cat-child-link<?= (int) $child['id'] === $activeCategoryId ? ' fx-cat-child-active' : '' ?>">

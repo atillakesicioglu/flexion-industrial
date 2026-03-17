@@ -379,6 +379,10 @@ function page_clean_url(string $url): string
     if ($uTrim === 'sectors.php' || $uTrim === 'sectors' || $uTrim === '/sectors' || $uTrim === '/sectors.php') {
         return function_exists('categories_list_url') ? categories_list_url() : '/categories';
     }
+    // Categories listesi: dil bazlı slug'a çevir
+    if ($uTrim === 'categories' || $uTrim === '/categories' || $uTrim === 'categories.php' || $uTrim === '/categories.php') {
+        return function_exists('categories_list_url') ? categories_list_url() : '/categories';
+    }
 
     if ($url === '' || strpos($url, 'page.php') === false) {
         return $url;

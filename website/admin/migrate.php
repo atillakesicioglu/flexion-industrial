@@ -734,6 +734,71 @@ if ($runMigration) {
         }
     }
 
+    // 5b. footer_links seed (kurumsal görünüm + dil uyumlu slug)
+    if (mg_table_exists($pdo, $dbName, 'footer_links')) {
+        try {
+            $seedLinks = [
+                // Company
+                ['company',     '', 'About Us',          'page.php?slug=about-us',  1, 1],
+                ['company',     '', 'Contact',           'page.php?slug=contact',   2, 1],
+                // Products
+                ['products',    '', 'All Products',      '/categories',             1, 1],
+                // Information
+                ['information', '', 'News',              'news',                    1, 1],
+                ['information', '', 'Privacy Policy',    'page.php?slug=privacy-policy', 2, 1],
+            ];
+
+            $ins = $pdo->prepare(
+                'INSERT INTO footer_links (column_key, column_label, title, url, sort_order, is_active)
+                 SELECT :ck, :cl, :t, :u, :so, :ia
+                 WHERE NOT EXISTS (
+                    SELECT 1 FROM footer_links WHERE column_key = :ck2 AND url = :u2 LIMIT 1
+                 )'
+            );
+            $seeded = 0;
+            foreach ($seedLinks as [$ck, $cl, $t, $u, $so, $ia]) {
+                $ins->execute([
+                    ':ck'  => $ck,  ':cl'  => $cl,  ':t'  => $t,  ':u'  => $u,  ':so' => $so, ':ia' => $ia,
+                    ':ck2' => $ck,  ':u2'  => $u,
+                ]);
+                $seeded += (int) $ins->rowCount();
+            }
+            $results[] = ['label' => 'footer_links: seed', 'status' => 'ok', 'msg' => $seeded . ' yeni link eklendi (varsa dokunulmadı)'];
+
+            // footer_link_translations: başlıkları dillere göre çevir (varsa)
+            if (mg_table_exists($pdo, $dbName, 'footer_link_translations')) {
+                $titleTr = [
+                    'About Us'       => ['de' => 'Über uns',        'it' => 'Chi siamo',      'fr' => 'À propos'],
+                    'Contact'        => ['de' => 'Kontakt',         'it' => 'Contatti',       'fr' => 'Contact'],
+                    'All Products'   => ['de' => 'Alle Produkte',   'it' => 'Tutti i prodotti','fr' => 'Tous les produits'],
+                    'News'           => ['de' => 'Neuigkeiten',     'it' => 'Notizie',        'fr' => 'Actualités'],
+                    'Privacy Policy' => ['de' => 'Datenschutzerklärung','it' => 'Informativa sulla privacy','fr' => 'Politique de confidentialité'],
+                ];
+                $getId = $pdo->prepare('SELECT id, title FROM footer_links WHERE column_key = ? AND url = ? LIMIT 1');
+                $insTr = $pdo->prepare(
+                    'INSERT INTO footer_link_translations (footer_link_id, language, title)
+                     VALUES (:fid, :lang, :title)
+                     ON DUPLICATE KEY UPDATE title = VALUES(title)'
+                );
+                $trCount = 0;
+                foreach ($seedLinks as [$ck, $_cl, $t, $u]) {
+                    $getId->execute([$ck, $u]);
+                    $row = $getId->fetch();
+                    if (!$row) continue;
+                    $fid = (int) $row['id'];
+                    foreach (['de','it','fr'] as $l) {
+                        if (!isset($titleTr[$t][$l])) continue;
+                        $insTr->execute([':fid' => $fid, ':lang' => $l, ':title' => $titleTr[$t][$l]]);
+                        $trCount++;
+                    }
+                }
+                $results[] = ['label' => 'footer_link_translations: seed', 'status' => 'ok', 'msg' => $trCount . ' çeviri işlendi'];
+            }
+        } catch (Throwable $e) {
+            $results[] = ['label' => 'footer_links: seed', 'status' => 'fail', 'msg' => $e->getMessage()];
+        }
+    }
+
     // 6. Kategori çevirileri — tüm diller için, slug ile lookup
     $categoryTranslationSeeds = [
         'water-hoses' => [

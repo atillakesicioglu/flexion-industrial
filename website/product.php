@@ -182,7 +182,7 @@ try {
 // Benzer ürünler
 $relatedProducts = [];
 try {
-    $relatedStmt = $pdo->prepare('SELECT id, name, main_image, code FROM products WHERE category_id = :cid AND id <> :id AND is_active = 1 ORDER BY sort_order ASC, id ASC LIMIT 3');
+    $relatedStmt = $pdo->prepare('SELECT id, slug, name, main_image, code FROM products WHERE category_id = :cid AND id <> :id AND is_active = 1 ORDER BY sort_order ASC, id ASC LIMIT 3');
     $relatedStmt->execute([':cid' => $product['category_id'], ':id' => $productId]);
     $relatedProducts = $relatedStmt->fetchAll();
 } catch (Throwable $e) {
@@ -355,7 +355,8 @@ try {
             </div>
             <?php foreach ($relatedProducts as $rp): ?>
                 <div class="col-md-4 fx-animate">
-                    <a href="<?= e(product_url($rp['slug'])) ?>"
+                    <?php $rpHref = !empty($rp['slug']) ? product_url((string)$rp['slug']) : 'product?id=' . (int)($rp['id'] ?? 0); ?>
+                    <a href="<?= e($rpHref) ?>"
                        class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                         <?php if (!empty($rp['main_image'])): ?>
                             <div class="fx-product-thumb">

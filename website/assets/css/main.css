@@ -166,6 +166,34 @@ a.text-dark:hover { color: var(--flexion-red) !important; }
     font-size: 0.85rem;
     border-bottom: 1px solid #e5e7eb;
 }
+/* Topbar: uzun dil metninde taşmayı önle */
+.fx-topbar .container {
+    flex-wrap: wrap;
+    gap: .25rem .75rem;
+}
+.fx-topbar .container > span:last-child {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+@media (max-width: 767.98px) {
+    .fx-topbar .container {
+        justify-content: center !important;
+        text-align: center;
+    }
+    .fx-topbar .container > span:first-child {
+        display: none;
+    }
+}
+
+/* Büyük ekranlarda sayfa daha geniş ve ferah */
+@media (min-width: 1400px) {
+    .container { max-width: 1360px; }
+    .fx-hero { padding: 5rem 0; }
+}
+@media (min-width: 1920px) {
+    .container { max-width: 1600px; }
+    .fx-hero { padding: 6rem 0; }
+}
 
 .fx-header-logo {
     font-weight: 700;
@@ -475,6 +503,22 @@ div.fx-card-img {
     width: auto;
     object-fit: contain;
     display: block;
+}
+
+/* Ürün detay küçük resimler */
+.gallery-thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    background: #ffffff;
+    border: 1.5px solid #0f172a !important;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 3px;
+    display: inline-block;
+}
+.gallery-thumb:hover {
+    border-color: var(--flexion-red) !important;
 }
 @media (max-width: 767.98px) {
     .fx-product-main {

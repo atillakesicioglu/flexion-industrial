@@ -374,6 +374,12 @@ function product_url(string $prodSlug): string
  */
 function page_clean_url(string $url): string
 {
+    // Eski sectors linkleri → yeni kategoriler sayfası (temiz URL)
+    $uTrim = trim($url);
+    if ($uTrim === 'sectors.php' || $uTrim === 'sectors' || $uTrim === '/sectors' || $uTrim === '/sectors.php') {
+        return function_exists('categories_list_url') ? categories_list_url() : '/categories';
+    }
+
     if ($url === '' || strpos($url, 'page.php') === false) {
         return $url;
     }

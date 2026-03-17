@@ -665,7 +665,7 @@ include __DIR__ . '/partials_header.php';
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label small fw-semibold">Uzun Açıklama</label>
-                                        <textarea name="trans_desc" class="form-control form-control-sm" rows="4"><?= e($_tr['description'] ?? '') ?></textarea>
+                                        <textarea name="trans_desc" class="form-control form-control-sm tinymce-tr" rows="4"><?= e($_tr['description'] ?? '') ?></textarea>
                                     </div>
                                     <div class="col-12">
                                         <button type="submit" class="btn btn-sm btn-primary">

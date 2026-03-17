@@ -207,7 +207,7 @@ try {
 
         <div class="row g-4 mb-5">
             <!-- ═══════════ SOL: Ana görsel + Küçük resimler + Regülasyonlar ═══════════ -->
-            <div class="col-md-5 fx-animate">
+            <div class="col-12 col-md-5 fx-animate">
 
                 <!-- Ana görsel -->
                 <?php if (!empty($product['main_image'])): ?>
@@ -231,14 +231,13 @@ try {
                     <div class="d-flex gap-2 mt-3 flex-wrap">
                         <?php if (!empty($product['main_image'])): ?>
                             <img src="<?= e(asset_url($product['main_image'])) ?>"
-                                 height="56" class="rounded border gallery-thumb"
-                                 style="cursor:pointer;object-fit:cover;width:56px;"
+                                 class="gallery-thumb"
+                                 loading="lazy"
                                  onclick="document.getElementById('main-product-img').src=this.src">
                         <?php endif; ?>
                         <?php foreach ($extraImages as $eImg): ?>
                             <img src="<?= e(asset_url($eImg['image'])) ?>"
-                                 height="56" class="rounded border gallery-thumb"
-                                 style="cursor:pointer;object-fit:cover;width:56px;"
+                                 class="gallery-thumb"
                                  loading="lazy"
                                  onclick="document.getElementById('main-product-img').src=this.src">
                         <?php endforeach; ?>
@@ -266,7 +265,7 @@ try {
             </div>
 
             <!-- ═══════════ SAĞ: Bilgi, doküman, buton ═══════════ -->
-            <div class="col-md-7 fx-animate" data-delay="80">
+            <div class="col-12 col-md-7 fx-animate" data-delay="80">
 
                 <!-- Kategori yolu (referans: / Food /) -->
                 <p class="small text-muted mb-1">

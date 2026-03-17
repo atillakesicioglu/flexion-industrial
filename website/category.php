@@ -138,7 +138,7 @@ try {
                 </div>
                 <div class="row g-3">
                     <?php foreach ($products as $product): ?>
-                        <div class="col-md-4 fx-animate">
+                        <div class="col-md-4 col-xl-3 fx-animate">
                             <a href="<?= e(product_url($product['slug'])) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                                 <?php if (!empty($product['main_image'])): ?>
                                     <div class="fx-product-thumb">

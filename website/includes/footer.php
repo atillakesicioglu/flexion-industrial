@@ -12,25 +12,27 @@ $logoPath    = get_setting('logo_path', '');
 $siteTitle   = t('site_title', get_setting('site_title', 'Flexion Industrial'));
 $logoHeight  = max(20, min(120, (int) get_setting('logo_height', '36')));
 
-// Footer linkleri - column_key'e göre grupla, çevirileri de al
+// Footer linkleri + dinamik kategori linkleri
+$footerCols = [];
+$lang = defined('CURRENT_LANG') ? CURRENT_LANG : 'en';
+
+// 1) Company / Information / Products sütunları DB'den (varsa)
 $footerLinksRaw = [];
 try {
     $pdo = db();
     $stmt = $pdo->query('SELECT * FROM footer_links WHERE is_active = 1 ORDER BY column_key ASC, sort_order ASC, id ASC');
     $footerLinksRaw = $stmt->fetchAll();
-} catch (Exception $e) {
-    // footer_links tablosu henüz yoksa sessizce geç
+} catch (Throwable $e) {
+    $footerLinksRaw = [];
 }
 
 // footer_link_translations çevirilerini al
 $_footerLinkTrans = [];
 if (!empty($footerLinksRaw)) {
-    $lang = defined('CURRENT_LANG') ? CURRENT_LANG : 'en';
     try {
-        $pdo2 = db();
         $ids  = array_column($footerLinksRaw, 'id');
         $in   = implode(',', array_fill(0, count($ids), '?'));
-        $stmt2 = $pdo2->prepare(
+        $stmt2 = $pdo->prepare(
             "SELECT footer_link_id, language, title
              FROM footer_link_translations
              WHERE footer_link_id IN ({$in}) AND language IN (?, 'en')"
@@ -40,26 +42,56 @@ if (!empty($footerLinksRaw)) {
             $_footerLinkTrans[$flt['footer_link_id']][$flt['language']] = $flt['title'];
         }
     } catch (Throwable $e) {
-        // tablosu yoksa sessizce devam et
+        $_footerLinkTrans = [];
     }
 }
 
-// Footer column labels: default to English (no Turkish on front)
-$footerColEn = ['kurumsal' => 'Corporate', 'iletisim' => 'Contact', 'urunler' => 'Products', 'contact' => 'Contact', 'products' => 'Products', 'corporate' => 'Corporate', 'iletişim' => 'Contact', 'ürünler' => 'Products', 'bize_ulasin' => 'Get in Touch'];
-$footerCols = [];
+$colLabelMap = [
+    'company'     => t('footer_col_company', 'Company'),
+    'products'    => t('footer_col_products', 'Products'),
+    'information' => t('footer_col_information', 'Information'),
+    'contact'     => t('footer_col_contact', 'Contact'),
+    'categories'  => t('footer_col_categories', 'Categories'),
+];
+
 foreach ($footerLinksRaw as $fl) {
     $colKey = $fl['column_key'];
     if (!isset($footerCols[$colKey])) {
-        $colLabel = t('footer_col_' . $colKey, $footerColEn[mb_strtolower($colKey)] ?? (preg_match('/^[a-z]/', $colKey) ? ucfirst($colKey) : 'Links'));
-        $footerCols[$colKey] = ['label' => $colLabel, 'links' => []];
+        $footerCols[$colKey] = ['label' => $colLabelMap[$colKey] ?? ucfirst($colKey), 'links' => []];
     }
-    // Link başlığını çevir
-    $lang = defined('CURRENT_LANG') ? CURRENT_LANG : 'en';
     $flTitle = $_footerLinkTrans[$fl['id']][$lang]
             ?? $_footerLinkTrans[$fl['id']]['en']
             ?? $fl['title'];
     $fl['title'] = $flTitle;
     $footerCols[$colKey]['links'][] = $fl;
+}
+
+// 2) Categories sütunu: aktif dilde dinamik (üst seviye ilk 6)
+try {
+    $pdo3 = db();
+    $cats = $pdo3->query("SELECT id, name, slug FROM categories WHERE is_active = 1 AND (parent_id IS NULL OR parent_id = 0) ORDER BY sort_order ASC, name ASC LIMIT 6")->fetchAll();
+    if ($cats) {
+        $ids = array_column($cats, 'id');
+        $in  = implode(',', array_fill(0, count($ids), '?'));
+        $tStmt = $pdo3->prepare("SELECT category_id, name, slug FROM category_translations WHERE category_id IN ($in) AND language = ?");
+        $tStmt->execute(array_merge($ids, [$lang]));
+        $trMap = [];
+        foreach ($tStmt->fetchAll() as $tr) $trMap[$tr['category_id']] = $tr;
+        $prefix = function_exists('lang_prefix') ? lang_prefix() : '';
+        $footerCols['categories'] = $footerCols['categories'] ?? ['label' => $colLabelMap['categories'], 'links' => []];
+        foreach ($cats as $cat) {
+            $name = $cat['name'];
+            $slug = $cat['slug'];
+            if (isset($trMap[$cat['id']])) {
+                if (!empty($trMap[$cat['id']]['name'])) $name = $trMap[$cat['id']]['name'];
+                if (!empty($trMap[$cat['id']]['slug'])) $slug = $trMap[$cat['id']]['slug'];
+            }
+            $url = $prefix !== '' ? $prefix . '/' . $slug : '/' . $slug;
+            $footerCols['categories']['links'][] = ['title' => $name, 'url' => $url];
+        }
+    }
+} catch (Throwable $e) {
+    // sessiz
 }
 ?>
 </main>
@@ -100,7 +132,11 @@ foreach ($footerLinksRaw as $fl) {
                         <ul class="list-unstyled small">
                             <?php foreach ($colData['links'] as $fl): ?>
                                 <li class="mb-1">
-                                    <?php $flHref = page_clean_url($fl['url']); if ($flHref === $fl['url']) { $flHref = localized_url($fl['url']); } ?>
+                                    <?php
+                                    $raw = (string) ($fl['url'] ?? '#');
+                                    $flHref = page_clean_url($raw);
+                                    if ($flHref === $raw) { $flHref = localized_url($raw); }
+                                    ?>
                                     <a href="<?= e($flHref) ?>" class="fx-footer-link"><?= e($fl['title']) ?></a>
                                 </li>
                             <?php endforeach; ?>

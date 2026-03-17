@@ -614,6 +614,38 @@ if ($runMigration) {
         ['footer_rights',            'de', 'Alle Rechte vorbehalten.'],
         ['footer_rights',            'it', 'Tutti i diritti riservati.'],
         ['footer_rights',            'fr', 'Tous droits réservés.'],
+        ['footer_social_title',      'en', 'Social Media'],
+        ['footer_social_title',      'de', 'Soziale Medien'],
+        ['footer_social_title',      'it', 'Social media'],
+        ['footer_social_title',      'fr', 'Réseaux sociaux'],
+        ['footer_col_company',       'en', 'Company'],
+        ['footer_col_company',       'de', 'Unternehmen'],
+        ['footer_col_company',       'it', 'Azienda'],
+        ['footer_col_company',       'fr', 'Entreprise'],
+        ['footer_col_products',      'en', 'Products'],
+        ['footer_col_products',      'de', 'Produkte'],
+        ['footer_col_products',      'it', 'Prodotti'],
+        ['footer_col_products',      'fr', 'Produits'],
+        ['footer_col_categories',    'en', 'Categories'],
+        ['footer_col_categories',    'de', 'Kategorien'],
+        ['footer_col_categories',    'it', 'Categorie'],
+        ['footer_col_categories',    'fr', 'Catégories'],
+        ['footer_col_information',   'en', 'Information'],
+        ['footer_col_information',   'de', 'Informationen'],
+        ['footer_col_information',   'it', 'Informazioni'],
+        ['footer_col_information',   'fr', 'Informations'],
+        ['footer_link_all_products', 'en', 'All Products'],
+        ['footer_link_all_products', 'de', 'Alle Produkte'],
+        ['footer_link_all_products', 'it', 'Tutti i prodotti'],
+        ['footer_link_all_products', 'fr', 'Tous les produits'],
+        ['footer_link_news',         'en', 'News'],
+        ['footer_link_news',         'de', 'Neuigkeiten'],
+        ['footer_link_news',         'it', 'Notizie'],
+        ['footer_link_news',         'fr', 'Actualités'],
+        ['footer_link_privacy',      'en', 'Privacy Policy'],
+        ['footer_link_privacy',      'de', 'Datenschutzerklärung'],
+        ['footer_link_privacy',      'it', 'Informativa sulla privacy'],
+        ['footer_link_privacy',      'fr', 'Politique de confidentialité'],
         ['footer_col_kurumsal',      'en', 'Corporate'],
         ['footer_col_iletisim',      'en', 'Contact'],
         ['footer_col_urunler',       'en', 'Products'],
@@ -692,7 +724,17 @@ if ($runMigration) {
         $results[] = ['label' => 'site_translations: varsayılan değerler', 'status' => 'ok', 'msg' => count($siteTranslationDefaults) . ' satır işlendi'];
     }
 
-    // 5. Kategori çevirileri — tüm diller için, slug ile lookup
+    // 5. footer_links URL düzeltmeleri (eski sectors.php linkleri)
+    if (mg_table_exists($pdo, $dbName, 'footer_links')) {
+        try {
+            $pdo->exec("UPDATE footer_links SET url = '/categories' WHERE url IN ('sectors.php', 'sectors', '/sectors', '/sectors.php')");
+            $results[] = ['label' => 'footer_links: sectors → /categories', 'status' => 'ok', 'msg' => 'URL düzeltmesi uygulandı (varsa)'];
+        } catch (Throwable $e) {
+            $results[] = ['label' => 'footer_links: sectors → /categories', 'status' => 'fail', 'msg' => $e->getMessage()];
+        }
+    }
+
+    // 6. Kategori çevirileri — tüm diller için, slug ile lookup
     $categoryTranslationSeeds = [
         'water-hoses' => [
             'de' => ['name' => 'Wasserschläuche',          'slug' => 'wasserschlaeuche',               'short_description' => 'Schläuche für Wasser und allgemeine Dienste'],
@@ -776,7 +818,7 @@ if ($runMigration) {
         $results[] = ['label' => 'Kategori çevirileri (DE/IT/FR)', 'status' => 'ok', 'msg' => "$catTrInserted satır işlendi (varsa dokunulmadı)"];
     }
 
-    // 6. Sayfa çevirileri — About Us ve Contact için DE/IT/FR
+    // 7. Sayfa çevirileri — About Us ve Contact için DE/IT/FR
     $pageTranslationSeeds = [
         'about-us' => [
             'de' => ['title' => 'Über uns',   'slug' => 'ueber-uns', 'banner_title' => 'Über uns'],
@@ -820,7 +862,7 @@ if ($runMigration) {
         $results[] = ['label' => 'Sayfa çevirileri About Us & Contact (DE/IT/FR)', 'status' => 'ok', 'msg' => "$pageTrInserted satır işlendi (varsa dokunulmadı)"];
     }
 
-    // 7. Varsayılan admin kullanıcısı
+    // 8. Varsayılan admin kullanıcısı
     $label = 'Kullanıcı: <code>admin</code>';
     try {
         $cnt = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE username = 'admin'")->fetchColumn();

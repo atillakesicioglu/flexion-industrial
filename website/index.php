@@ -156,7 +156,6 @@ if (empty($sections)) {
                         <h2 class="h3 mb-1"><?= e($section['title'] ?? ($c['title'] ?? 'Uygulama Sektörleri')) ?></h2>
                         <p class="text-muted mb-0 small"><?= e($c['subtitle'] ?? '') ?></p>
                     </div>
-                    <a href="<?= e(categories_list_url()) ?>" class="btn btn-outline-secondary btn-sm"><?= e(t('home_btn_view_categories', 'View All Categories')) ?></a>
                 </div>
                 <div class="row g-3">
                     <?php foreach ($categories as $cat):
@@ -233,7 +232,6 @@ if (empty($sections)) {
                         <h2 class="h3 mb-1"><?= e($section['title'] ?? ($c['title'] ?? 'Güncel Haberler')) ?></h2>
                         <p class="text-muted mb-0 small"><?= e($c['subtitle'] ?? '') ?></p>
                     </div>
-                    <a href="news" class="btn btn-outline-secondary btn-sm"><?= e(t('home_btn_view_news', 'View All News')) ?></a>
                 </div>
                 <div class="row g-3">
                     <?php foreach ($latestNews as $news):

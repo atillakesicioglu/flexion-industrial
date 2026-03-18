@@ -473,6 +473,14 @@ img.fx-news-card-img {
     .fx-news-detail-img { height: 260px !important; }
 }
 
+/* Haber kart özet metni — sabit satır sayısı (kart yüksekliği eşitlenir) */
+.fx-news-card-summary {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 /* Ürün kart görseli — sabit alan, ortalanmış hortum */
 .fx-product-thumb {
     background-color: #ffffff;

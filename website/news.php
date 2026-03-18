@@ -86,14 +86,16 @@ if ($slug) {
                             $nSlug  = $nTr['slug']  ?? $n['slug'];
                         ?>
                             <li class="mb-3">
-                                <a href="<?= e(news_base_url() . '/' . rawurlencode($nSlug)) ?>" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
+                                <a href="<?= e(news_base_url() . '/' . rawurlencode($nSlug)) ?>" class="d-flex align-items-center gap-3 text-decoration-none text-dark">
                                     <?php if (!empty($n['image'])): ?>
                                         <img src="<?= e(asset_url($n['image'])) ?>" alt="<?= e($nTitle) ?>"
-                                             style="width:60px;height:45px;object-fit:cover;border-radius:4px;flex-shrink:0;">
+                                             style="width:84px;height:64px;object-fit:cover;border-radius:6px;flex-shrink:0;">
                                     <?php else: ?>
-                                        <div style="width:60px;height:45px;background:#f0f0f0;border-radius:4px;flex-shrink:0;"></div>
+                                        <div style="width:84px;height:64px;background:#f0f0f0;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                                            <i class="bi bi-newspaper text-muted"></i>
+                                        </div>
                                     <?php endif; ?>
-                                    <span class="small fw-medium"><?= e($nTitle) ?></span>
+                                    <span class="fw-semibold lh-sm"><?= e($nTitle) ?></span>
                                 </a>
                             </li>
                         <?php endforeach; ?>
@@ -137,8 +139,8 @@ try {
                     <a href="<?= e(news_base_url() . '/' . rawurlencode($nListSlug)) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark">
                 <?php if (!empty($news['image'])): ?>
                     <img src="<?= e(asset_url($news['image'])) ?>" class="card-img-top fx-news-card-img" alt="<?= e($nListTitle) ?>" loading="lazy">
-                <?php else: ?>
-                            <div class="fx-card-img bg-light d-flex align-items-center justify-content-center text-muted">
+                        <?php else: ?>
+                            <div class="fx-news-card-img bg-light d-flex align-items-center justify-content-center text-muted">
                                 <i class="bi bi-newspaper fs-2"></i>
                             </div>
                         <?php endif; ?>
@@ -149,7 +151,7 @@ try {
                                     <?= e(date('d.m.Y', strtotime($news['published_at']))) ?>
                                 </p>
                             <?php endif; ?>
-                            <p class="small text-muted mb-0"><?= e($nListSummary) ?></p>
+                            <p class="small text-muted mb-0 fx-news-card-summary"><?= e($nListSummary) ?></p>
                         </div>
                     </a>
                 </div>

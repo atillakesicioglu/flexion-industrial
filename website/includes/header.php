@@ -351,8 +351,12 @@ function closeMobileMenu() {
         if (!items || !items.length) { hide(); return; }
         box.innerHTML = items.map(function (it) {
             var safeTitle = (it.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            var safeUrl = (it.url || '#').replace(/"/g, '&quot;');
-            return '<a class="fx-search-suggest-item" href="' + safeUrl + '">' + safeTitle + '</a>';
+            var safeUrl   = (it.url   || '#').replace(/"/g, '&quot;');
+            var safeImg   = (it.image || '').replace(/"/g, '&quot;');
+            var imgHtml   = safeImg
+                ? '<img class="fx-search-suggest-thumb" src="' + safeImg + '" alt="" aria-hidden="true">'
+                : '<span class="fx-search-suggest-thumb-ph"><i class="bi bi-box-seam"></i></span>';
+            return '<a class="fx-search-suggest-item" href="' + safeUrl + '">' + imgHtml + '<span class="fx-search-suggest-name">' + safeTitle + '</span></a>';
         }).join('');
         box.classList.remove('d-none');
     }

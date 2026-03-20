@@ -16,7 +16,7 @@ $items = [];
 
 try {
     $stmt = $pdo->prepare(
-        'SELECT p.id,
+        'SELECT p.id, p.main_image,
                 COALESCE(NULLIF(pt.name, \'\'), p.name) AS name,
                 COALESCE(NULLIF(pt.slug, \'\'), p.slug) AS slug
          FROM products p
@@ -34,10 +34,12 @@ try {
         ':q1' => $like, ':q2' => $like, ':q3' => $like, ':q4' => $like, ':q5' => $like,
     ]);
     foreach (($stmt->fetchAll() ?: []) as $row) {
-        $slug = (string)($row['slug'] ?? '');
+        $slug  = (string)($row['slug'] ?? '');
+        $img   = !empty($row['main_image']) ? asset_url((string)$row['main_image']) : '';
         $items[] = [
             'title' => (string)($row['name'] ?? ''),
-            'url' => $slug !== '' ? product_url($slug) : 'product?id=' . (int)($row['id'] ?? 0),
+            'url'   => $slug !== '' ? product_url($slug) : 'product?id=' . (int)($row['id'] ?? 0),
+            'image' => $img,
         ];
     }
 } catch (Throwable $e) {

@@ -222,6 +222,21 @@ $resolvedMetaDescription = isset($pageMetaDescription) && trim((string)$pageMeta
         </button>
     </div>
 
+    <!-- Mobil arama (önerisiz) -->
+    <form action="<?= e(localized_url('/search')) ?>" method="get" class="fx-mobile-search-wrap px-3 pt-3 pb-2">
+        <div class="input-group">
+            <input type="search"
+                   name="q"
+                   class="form-control"
+                   value="<?= e($_searchQ) ?>"
+                   placeholder="<?= e(t('search_placeholder', 'Search products...')) ?>"
+                   aria-label="<?= e(t('search_placeholder', 'Search products...')) ?>">
+            <button class="btn btn-primary" type="submit" aria-label="<?= e(t('search_submit', 'Search')) ?>">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
+
     <!-- Menü linkleri -->
     <ul class="fx-mobile-nav list-unstyled mb-0">
         <?php foreach ($menu as $_mItem): ?>
@@ -356,8 +371,9 @@ function closeMobileMenu() {
             var isCat     = it.type === 'category';
             var phIcon    = isCat ? 'bi-grid' : 'bi-box-seam';
             var typeClass = isCat ? ' fx-suggest-cat' : ' fx-suggest-prod';
+            var imgClass  = isCat ? 'fx-search-suggest-thumb fx-search-suggest-thumb-cat' : 'fx-search-suggest-thumb';
             var imgHtml   = safeImg
-                ? '<img class="fx-search-suggest-thumb" src="' + safeImg + '" alt="" aria-hidden="true">'
+                ? '<img class="' + imgClass + '" src="' + safeImg + '" alt="" aria-hidden="true">'
                 : '<span class="fx-search-suggest-thumb-ph"><i class="bi ' + phIcon + '"></i></span>';
             return '<a class="fx-search-suggest-item' + typeClass + '" href="' + safeUrl + '">'
                 + imgHtml
@@ -368,6 +384,7 @@ function closeMobileMenu() {
         box.classList.remove('d-none');
     }
     input.addEventListener('input', function () {
+        if (window.matchMedia('(max-width: 991.98px)').matches) { hide(); return; }
         var q = input.value.trim();
         if (q.length < 1) { hide(); return; }
         if (q === lastQ) return;

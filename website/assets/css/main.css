@@ -486,8 +486,9 @@ img.fx-news-card-img {
 .fx-search-suggest {
     position: absolute;
     top: calc(100% + 6px);
-    left: 0;
     right: 0;
+    left: auto;
+    width: min(520px, calc(100vw - 24px));
     z-index: 1100;
     background: #fff;
     border: 1px solid rgba(0,0,0,.08);
@@ -519,6 +520,9 @@ img.fx-news-card-img {
     border-radius: 6px;
     border: 1px solid #e5e7eb;
     padding: 2px;
+}
+.fx-search-suggest-thumb-cat {
+    object-fit: cover;
 }
 .fx-search-suggest-thumb-ph {
     width: 40px;
@@ -559,6 +563,16 @@ img.fx-news-card-img {
 }
 .fx-search-suggest-item.fx-suggest-cat:hover {
     background: #f3f4f6;
+}
+@media (max-width: 1199.98px) {
+    .fx-search-form { min-width: 200px; }
+    .fx-search-suggest { width: min(460px, calc(100vw - 24px)); }
+}
+@media (max-width: 991.98px) {
+    .fx-search-suggest { display: none !important; }
+}
+@media (max-width: 575.98px) {
+    .fx-search-form { min-width: 170px; }
 }
 
 /* Ürün kart görseli — sabit alan, ortalanmış hortum */
@@ -1105,6 +1119,21 @@ a.fx-cat-btn.fx-cat-active {
     padding: 1rem 1.25rem;
     border-bottom: 1px solid rgba(255,255,255,.08);
     flex-shrink: 0;
+}
+.fx-mobile-search-wrap .form-control {
+    background: #0f172a;
+    border-color: rgba(255,255,255,.18);
+    color: #fff;
+}
+.fx-mobile-search-wrap .form-control::placeholder {
+    color: #9ca3af;
+}
+.fx-mobile-search-wrap .form-control:focus {
+    border-color: var(--flexion-red);
+    box-shadow: 0 0 0 .18rem rgba(230, 20, 33, .2);
+}
+.fx-mobile-search-wrap .btn {
+    min-width: 46px;
 }
 .fx-mobile-close-btn {
     display: flex;

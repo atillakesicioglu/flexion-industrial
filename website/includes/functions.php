@@ -297,6 +297,10 @@ function smart_lang_switch_url(string $lang): string
         $targetPrefix = ($lang !== (defined('DEFAULT_LANG') ? DEFAULT_LANG : 'en')) ? '/' . $lang : '';
         return $targetPrefix . '/' . $targetBase;
     }
+    // Özel: arama sayfası
+    if ($slug === 'search') {
+        return $prefix . '/search';
+    }
 
     // Özel: kategoriler listesi slug'ları
     $categoriesListMap = ['en' => 'categories', 'de' => 'kategorien', 'it' => 'categorie', 'fr' => 'categories'];

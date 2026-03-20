@@ -3,7 +3,7 @@
 require_once __DIR__ . '/includes/header.php';
 
 $categoriesTree   = get_categories_tree();
-// Sektörler sayfasında üst seviye kategoriler kart olarak listelenir
+// Legacy sectors page: üst seviye kategoriler kart olarak listelenir
 $categories       = $categoriesTree;
 $activeCategoryId = 0;
 ?>
@@ -17,16 +17,17 @@ $activeCategoryId = 0;
             <div class="col-lg-9">
                 <div class="d-flex justify-content-between align-items-end mb-4">
                     <div>
-                        <h1 class="h3 mb-1">Uygulama Sektörleri</h1>
+                        <h1 class="h3 mb-1"><?= e(t('cat_categories_title', 'Categories')) ?></h1>
                         <p class="text-muted mb-0 small">
-                            Flexion hortum ve kablolarının kullanıldığı başlıca endüstriyel alanlar.
+                            <?= e(t('sectors_legacy_desc', 'Main industrial application areas for Flexion hose solutions.')) ?>
                         </p>
                     </div>
                 </div>
                 <div class="row g-3">
                     <?php foreach ($categories as $cat): ?>
                         <div class="col-6 col-md-4 fx-animate">
-                            <a href="category?id=<?= e((string) $cat['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark overflow-hidden">
+                            <?php $catHref = !empty($cat['slug']) ? localized_url('/' . ltrim((string)$cat['slug'], '/')) : localized_url('category?id=' . (int)$cat['id']); ?>
+                            <a href="<?= e($catHref) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark overflow-hidden">
                                 <?php if (!empty($cat['image'])): ?>
                                     <img src="<?= e(asset_url($cat['image'])) ?>" class="card-img-top fx-card-img" alt="<?= e($cat['name']) ?>" loading="lazy">
                                 <?php else: ?>

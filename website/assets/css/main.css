@@ -481,6 +481,32 @@ img.fx-news-card-img {
     overflow: hidden;
 }
 
+/* Header arama öneri dropdown */
+.fx-search-form { min-width: 230px; }
+.fx-search-suggest {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 1100;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: .5rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    overflow: hidden;
+}
+.fx-search-suggest-item {
+    display: block;
+    padding: .55rem .7rem;
+    color: #1f2937;
+    text-decoration: none;
+    font-size: .875rem;
+}
+.fx-search-suggest-item:hover {
+    background: #f8fafc;
+    color: #111827;
+}
+
 /* Ürün kart görseli — sabit alan, ortalanmış hortum */
 .fx-product-thumb {
     background-color: #ffffff;

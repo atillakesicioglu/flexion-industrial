@@ -4,7 +4,7 @@ require_once __DIR__ . '/i18n.php';
 require_once __DIR__ . '/functions.php';
 
 $siteTitle   = t('site_title', get_setting('site_title', 'Flexion Industrial'));
-$topbarText  = t('topbar_text', get_setting('topbar_text', 'Industrial rubber and cable solutions'));
+$topbarText  = t('topbar_text', get_setting('topbar_text', 'Industrial and hydraulic hose solutions'));
 $logoPath    = get_setting('logo_path', '');
 $logoHeight  = max(20, min(120, (int) get_setting('logo_height', '36')));
 $menu        = get_main_menu();
@@ -48,22 +48,33 @@ function nav_is_active(string $url): bool {
 
 $_langLabels = ['en' => 'English', 'de' => 'Deutsch', 'it' => 'Italiano', 'fr' => 'Français'];
 $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr' => '🇫🇷'];
+$_reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$_isSearchPath = (bool) preg_match('#^/(de|fr|it)/search/?$|^/search/?$#', $_reqPath);
+$_searchQ = trim((string)($_GET['q'] ?? ''));
+$resolvedPageTitle = isset($pageTitle) && trim((string)$pageTitle) !== '' ? (string)$pageTitle : $siteTitle;
+$resolvedMetaDescription = isset($pageMetaDescription) && trim((string)$pageMetaDescription) !== ''
+    ? (string)$pageMetaDescription
+    : t('meta_description', get_setting('meta_description', 'Flexion Industrial provides industrial and hydraulic hose solutions from Lamone, Switzerland.'));
 ?>
 <!DOCTYPE html>
 <html lang="<?= e(CURRENT_LANG) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($siteTitle) ?></title>
-    <meta name="description" content="<?= e(t('meta_description', get_setting('meta_description', 'Flexion industrial hose and cable solutions'))) ?>">
+    <title><?= e($resolvedPageTitle) ?></title>
+    <meta name="description" content="<?= e($resolvedMetaDescription) ?>">
     <!-- Open Graph / Social sharing -->
     <meta property="og:type"        content="website">
-    <meta property="og:title"       content="<?= e($siteTitle) ?>">
-    <meta property="og:description" content="<?= e(t('meta_description', get_setting('meta_description', 'Flexion industrial hose and cable solutions'))) ?>">
+    <meta property="og:title"       content="<?= e($resolvedPageTitle) ?>">
+    <meta property="og:description" content="<?= e($resolvedMetaDescription) ?>">
     <meta property="og:url"         content="<?= e((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? '') . ($_SERVER['REQUEST_URI'] ?? '/')) ?>">
     <?php $ogImage = get_setting('og_image', ''); if ($ogImage): ?>
     <meta property="og:image"       content="<?= e($ogImage) ?>">
     <?php endif; ?>
+    <?php foreach (SUPPORTED_LANGS as $_hl): ?>
+        <link rel="alternate" hreflang="<?= e($_hl) ?>" href="<?= e(smart_lang_switch_url($_hl)) ?>">
+    <?php endforeach; ?>
+    <link rel="alternate" hreflang="x-default" href="<?= e(home_url()) ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?= e(asset_url('assets/css/main.css')) ?>">
@@ -148,11 +159,12 @@ $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr'
             </ul>
 
             <!-- Arama formu -->
-            <form action="search" method="get" class="d-flex ms-lg-3 mt-2 mt-lg-0">
-                <input type="search" name="q" class="form-control form-control-sm" placeholder="<?= e(t('search_placeholder', 'Search products...')) ?>">
+            <form action="<?= e(localized_url('/search')) ?>" method="get" class="d-flex ms-lg-3 mt-2 mt-lg-0 position-relative fx-search-form">
+                <input type="search" id="fxSearchInput" name="q" value="<?= e($_searchQ) ?>" autocomplete="off" class="form-control form-control-sm" placeholder="<?= e(t('search_placeholder', 'Search products...')) ?>">
                 <button class="btn btn-sm btn-primary ms-1" type="submit">
                     <i class="bi bi-search"></i>
                 </button>
+                <div id="fxSearchSuggest" class="fx-search-suggest d-none" role="listbox" aria-label="<?= e(t('search_suggest_aria', 'Search suggestions')) ?>"></div>
             </form>
 
             <!-- Dil seçici -->
@@ -163,7 +175,13 @@ $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr'
                 </button>
                 <div class="fx-lang-menu" id="fxLangMenu" role="menu">
                     <?php foreach (SUPPORTED_LANGS as $_l): ?>
-                        <a href="<?= e(smart_lang_switch_url($_l)) ?>"
+                        <?php
+                            $_langHref = smart_lang_switch_url($_l);
+                            if ($_isSearchPath && $_searchQ !== '') {
+                                $_langHref .= '?' . http_build_query(['q' => $_searchQ]);
+                            }
+                        ?>
+                        <a href="<?= e($_langHref) ?>"
                            class="<?= $_l === CURRENT_LANG ? 'active' : '' ?>"
                            role="menuitem"
                            <?php if ($_l !== CURRENT_LANG): ?>
@@ -238,7 +256,13 @@ $_langFlags  = ['en' => '🇬🇧', 'de' => '🇩🇪', 'it' => '🇮🇹', 'fr'
         <p class="small text-secondary mb-2 text-uppercase fw-semibold" style="font-size:.7rem;"><?= e(t('nav_language', 'Language')) ?></p>
         <div class="d-flex gap-2 flex-wrap">
             <?php foreach (SUPPORTED_LANGS as $_ml): ?>
-                <a href="<?= e(smart_lang_switch_url($_ml)) ?>"
+                <?php
+                    $_mLangHref = smart_lang_switch_url($_ml);
+                    if ($_isSearchPath && $_searchQ !== '') {
+                        $_mLangHref .= '?' . http_build_query(['q' => $_searchQ]);
+                    }
+                ?>
+                <a href="<?= e($_mLangHref) ?>"
                    class="btn btn-sm <?= $_ml === CURRENT_LANG ? 'btn-primary' : 'btn-outline-secondary' ?>"
                    style="font-size:.8rem;"
                    onclick="document.cookie='fx_lang=<?= $_ml ?>;path=/;max-age=31536000';">
@@ -307,6 +331,41 @@ function closeMobileMenu() {
         dd.classList.remove('fx-lang-open');
         btn.setAttribute('aria-expanded', 'false');
     });
+}());
+
+// Header arama otomatik öneri (max 5 ürün)
+(function () {
+    var input = document.getElementById('fxSearchInput');
+    var box = document.getElementById('fxSearchSuggest');
+    if (!input || !box) return;
+    var timer = null;
+    var lastQ = '';
+    function hide() { box.classList.add('d-none'); box.innerHTML = ''; }
+    function render(items) {
+        if (!items || !items.length) { hide(); return; }
+        box.innerHTML = items.map(function (it) {
+            var safeTitle = (it.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            var safeUrl = (it.url || '#').replace(/"/g, '&quot;');
+            return '<a class="fx-search-suggest-item" href="' + safeUrl + '">' + safeTitle + '</a>';
+        }).join('');
+        box.classList.remove('d-none');
+    }
+    input.addEventListener('input', function () {
+        var q = input.value.trim();
+        if (q.length < 2) { hide(); return; }
+        if (q === lastQ) return;
+        lastQ = q;
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            fetch('/search_suggest.php?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.ok ? r.json() : []; })
+                .then(function (data) { render(Array.isArray(data) ? data.slice(0, 5) : []); })
+                .catch(function () { hide(); });
+        }, 220);
+    });
+    input.addEventListener('blur', function () { setTimeout(hide, 150); });
+    input.addEventListener('focus', function () { if (box.innerHTML.trim() !== '') box.classList.remove('d-none'); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
 }());
 </script>
 <main>

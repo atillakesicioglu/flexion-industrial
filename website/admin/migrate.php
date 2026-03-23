@@ -1251,9 +1251,10 @@ if ($runMigration) {
                 ['company',     'About Us',          'page.php?slug=about-us',           1],
                 ['company',     'Contact',           'page.php?slug=contact',            2],
                 ['company',     'News',              '/news',                             3],
-                // Products
-                ['products',    'All Products',      '/categories',                       1],
-                ['products',    'Catalog',           '/assets/uploads/catalog/flexion-catalog.pdf', 2],
+                // Products (sıra: Catalog, Product Overview, All Products)
+                ['products',    'Catalog',           '/assets/uploads/documents/67fbca8010da0f1acd707d0f.pdf', 1],
+                ['products',    'Product Overview',  '/assets/uploads/documents/Flexion%20Catalog.pdf', 2],
+                ['products',    'All Products',      '/categories',                       3],
                 // Information
                 ['information', 'Privacy Policy',    'page.php?slug=privacy-policy',     1],
                 ['information', 'Cookie Policy',     'page.php?slug=cookie-policy',      2],
@@ -1273,6 +1274,7 @@ if ($runMigration) {
                 'News'               => ['de' => 'Neuigkeiten',             'it' => 'Notizie',                'fr' => 'Actualités'],
                 'All Products'       => ['de' => 'Alle Produkte',           'it' => 'Tutti i prodotti',       'fr' => 'Tous les produits'],
                 'Catalog'            => ['de' => 'Katalog',                 'it' => 'Catalogo',               'fr' => 'Catalogue'],
+                'Product Overview'   => ['de' => 'Produktübersicht',        'it' => 'Panoramica prodotti',    'fr' => 'Aperçu des produits'],
                 'Privacy Policy'     => ['de' => 'Datenschutzerklärung',    'it' => 'Informativa sulla privacy', 'fr' => 'Politique de confidentialité'],
                 'Cookie Policy'      => ['de' => 'Cookie-Richtlinie',       'it' => 'Cookie Policy',          'fr' => 'Politique des cookies'],
                 'Terms & Conditions' => ['de' => 'AGB',                     'it' => 'Termini e condizioni',   'fr' => 'Conditions générales'],

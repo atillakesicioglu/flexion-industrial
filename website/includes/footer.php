@@ -140,7 +140,14 @@ try {
                                     <?php
                                     $raw = (string) ($fl['url'] ?? '#');
                                     $flHref = page_clean_url($raw);
-                                    if ($flHref === $raw) { $flHref = localized_url($raw); }
+                                    // Harici/protokollü linkler ve static asset yolları dil prefix almaz
+                                    if ($flHref === $raw) {
+                                        $isProtocolUrl = (bool) preg_match('#^(https?:|mailto:|tel:|javascript:)#i', $raw);
+                                        $isStaticAsset = str_starts_with($raw, '/assets/') || str_starts_with($raw, 'assets/');
+                                        if (!$isProtocolUrl && !$isStaticAsset && $raw !== '#') {
+                                            $flHref = localized_url($raw);
+                                        }
+                                    }
                                     ?>
                                     <a href="<?= e($flHref) ?>" class="fx-footer-link"><?= e($fl['title']) ?></a>
                                 </li>

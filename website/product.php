@@ -249,7 +249,7 @@ try {
                 <?php if ($pickedRegs): ?>
                     <div class="mt-4 pt-3 border-top">
                         <p class="small text-uppercase text-muted fw-semibold mb-2" style="font-size:.72rem;letter-spacing:.06em;">
-                            <?= e(t('prod_regs_title', 'Regulations &amp; Certifications')) ?>
+                            <?= e(t('prod_regs_title', 'Regulations')) ?>
                         </p>
                         <div class="d-flex flex-wrap gap-2">
                             <?php foreach ($pickedRegs as $reg): ?>

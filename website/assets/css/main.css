@@ -835,18 +835,19 @@ img.fx-news-card-img {
 
 /* ---- Regülasyon rozet görseli (sol sütun) ---- */
 .fx-reg-badge {
-    width: 64px;
-    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
 }
 .fx-reg-badge img {
-    max-width: 58px;
-    max-height: 42px;
+    max-width: 132px;
+    max-height: 80px;
+    width: auto;
+    height: auto;
     object-fit: contain;
 }
 

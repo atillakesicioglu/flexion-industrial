@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/upload_helper.php';
+require_once __DIR__ . '/../includes/icon_lightness.php';
 
 require_admin_login();
 
@@ -30,7 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $sort = (int)$pdo->query('SELECT IFNULL(MAX(sort_order),0)+1 FROM catalog_product_icons')->fetchColumn();
                 $pdo->prepare('INSERT INTO catalog_product_icons (image_path, admin_label, sort_order, is_active) VALUES (?,?,?,1)')
                     ->execute([$uploadBase . $fname, $label, $sort]);
-                $msg = 'İkon eklendi.';
+                $fullPath = __DIR__ . '/../' . $uploadBase . $fname;
+                $autoDark = fx_catalog_icon_postprocess($fullPath);
+                $msg      = 'İkon eklendi.';
+                if ($autoDark) {
+                    $msg .= ' Açık/beyaz tonlar otomatik koyulaştırıldı (şeffaflık korunur).';
+                }
             }
         }
     } elseif (isset($_POST['delete_icon'])) {
@@ -89,7 +95,7 @@ try {
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">Görsel <span class="text-danger">*</span></label>
                             <input type="file" name="icon_image" class="form-control form-control-sm" accept="image/jpeg,image/png,image/webp,image/svg+xml" required>
-                            <div class="form-text">PNG/SVG önerilir, maks 3 MB. Detay sayfasında sabit boyutta gösterilir.</div>
+                            <div class="form-text">PNG/SVG önerilir, maks 3 MB. Beyaz veya çok açık renkli PNG/WebP ikonlarda (şeffaf zemin) sistem otomatik koyulaştırır; JPEG’te otomatik işlem yok. SVG’de <code>fill/stroke</code> olarak yazılmış düz beyaz (#fff, white) koyu griye çevrilir.</div>
                         </div>
                         <button type="submit" class="btn btn-sm btn-primary w-100">+ Ekle</button>
                     </form>

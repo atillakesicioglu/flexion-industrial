@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/upload_helper.php';
+
 require_admin_login();
 
 $pdo   = db();
-$token = generate_csrf_token();
+$token = csrf_token();
 $msg   = '';
 $err   = '';
 
@@ -54,7 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$items = $pdo->query('SELECT * FROM catalog_regulation_images ORDER BY sort_order ASC, id ASC')->fetchAll();
+$items = [];
+try {
+    $items = $pdo->query('SELECT * FROM catalog_regulation_images ORDER BY sort_order ASC, id ASC')->fetchAll();
+} catch (Throwable $e) {
+    $err = $err ?: 'Veritabanı tablosu eksik. Lütfen önce <a href="migrate.php">DB Migrasyonu</a> sayfasını çalıştırın.';
+}
 ?>
 <?php include __DIR__ . '/partials_header.php'; ?>
 <div class="container-fluid px-4 py-4">

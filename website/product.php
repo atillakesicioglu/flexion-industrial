@@ -296,10 +296,10 @@ try {
 
                         <!-- PDF Dokümanlar: 2 sütunlu ızgara, tümü buton -->
                         <?php if (!empty($documents)): ?>
-                            <div class="fx-doc-grid mb-4">
+                            <div class="d-flex flex-wrap gap-2 mb-4">
                                 <?php foreach ($documents as $doc): ?>
                                     <a href="<?= e(asset_url($doc['file_path'])) ?>" target="_blank" rel="noopener"
-                                       class="fx-doc-btn">
+                                       class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
                                         <i class="bi bi-file-earmark-arrow-down"></i>
                                         <?= e($doc['title']) ?>
                                     </a>

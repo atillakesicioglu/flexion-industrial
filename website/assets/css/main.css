@@ -361,6 +361,10 @@ img.fx-card-img {
     object-position: center;
     flex-shrink: 0;
 }
+.fx-card-img-contain {
+    object-fit: contain !important;
+    background: #f8f9fa;
+}
 div.fx-card-img {
     display: flex !important;
     height: 200px !important;

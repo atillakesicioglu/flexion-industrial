@@ -3,6 +3,21 @@
 require_once __DIR__ . '/includes/header.php';
 
 $categoriesTree = get_categories_tree();
+$pdo = db();
+
+$allProducts = [];
+try {
+    $stmt = $pdo->query(
+        'SELECT p.id, p.name, p.code, p.main_image, p.short_description, c.name AS category_name
+         FROM products p
+         JOIN categories c ON c.id = p.category_id
+         WHERE p.is_active = 1
+         ORDER BY c.sort_order ASC, c.name ASC, p.sort_order ASC, p.name ASC'
+    );
+    $allProducts = $stmt->fetchAll();
+} catch (Throwable $e) {
+    $allProducts = [];
+}
 ?>
 
 <section class="py-5">
@@ -77,6 +92,48 @@ $categoriesTree = get_categories_tree();
                             </a>
                         </div>
                     <?php endforeach; ?>
+                </div>
+
+                <hr class="my-5">
+
+                <div class="d-flex justify-content-between align-items-end mb-4">
+                    <div>
+                        <h2 class="h4 mb-1">Tum Urunler</h2>
+                        <p class="text-muted mb-0 small">
+                            Tum kategorilerdeki aktif urunlerin tam listesi.
+                        </p>
+                    </div>
+                    <span class="badge text-bg-light border"><?= count($allProducts) ?> urun</span>
+                </div>
+
+                <div class="row g-3">
+                    <?php foreach ($allProducts as $product): ?>
+                        <div class="col-6 col-md-4 col-xl-3 fx-animate">
+                            <a href="product?id=<?= e((string) $product['id']) ?>" class="card border-0 shadow-sm h-100 text-decoration-none text-dark overflow-hidden">
+                                <?php if (!empty($product['main_image'])): ?>
+                                    <img src="<?= e($product['main_image']) ?>" class="card-img-top fx-card-img" alt="<?= e($product['name']) ?>" loading="lazy">
+                                <?php else: ?>
+                                    <div class="fx-card-img bg-light text-muted">
+                                        <i class="bi bi-box-seam fs-2"></i>
+                                    </div>
+                                <?php endif; ?>
+                                <div class="card-body py-3">
+                                    <h3 class="h6 mb-1"><?= e($product['name']) ?></h3>
+                                    <p class="small text-muted mb-1"><?= e($product['category_name']) ?></p>
+                                    <?php if (!empty($product['code'])): ?>
+                                        <p class="small text-muted mb-1">Kod: <?= e($product['code']) ?></p>
+                                    <?php endif; ?>
+                                    <p class="small text-muted mb-0"><?= e($product['short_description'] ?? '') ?></p>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+
+                    <?php if (empty($allProducts)): ?>
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">Henüz aktif urun bulunmuyor.</div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

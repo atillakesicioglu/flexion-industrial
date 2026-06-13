@@ -5,6 +5,7 @@ require_once __DIR__ . '/functions.php';
 
 $siteTitle   = t('site_title', get_setting('site_title', 'Flexion Industrial'));
 $topbarText  = t('topbar_text', get_setting('topbar_text', 'Industrial and hydraulic hose solutions'));
+$contactPhone = get_setting('contact_phone', '');
 $logoPath    = get_setting('logo_path', '');
 $logoHeight  = max(20, min(120, (int) get_setting('logo_height', '36')));
 $menu        = get_main_menu();
@@ -90,9 +91,12 @@ $resolvedMetaDescription = isset($pageMetaDescription) && trim((string)$pageMeta
 <div class="fx-topbar py-1">
     <div class="container d-flex justify-content-between align-items-center">
         <span class="text-muted"><?= e($topbarText) ?></span>
-        <span class="text-muted small d-none d-md-inline">
-            <i class="bi bi-telephone me-1"></i><?= e(get_setting('contact_phone', '+90 ... ... .. ..')) ?>
+        <?php if ($contactPhone): ?>
+        <span class="text-muted small">
+            <i class="bi bi-telephone me-1"></i>
+            <a href="tel:<?= e(preg_replace('/[^\d+]/', '', $contactPhone)) ?>" class="text-reset"><?= e($contactPhone) ?></a>
         </span>
+        <?php endif; ?>
     </div>
 </div>
 

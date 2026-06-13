@@ -239,6 +239,9 @@ a.text-dark:hover { color: var(--flexion-red) !important; }
     flex-shrink: 0;
     white-space: nowrap;
 }
+.fx-topbar a.text-reset:hover {
+    color: var(--flexion-red) !important;
+}
 @media (max-width: 767.98px) {
     .fx-topbar .container {
         justify-content: center !important;

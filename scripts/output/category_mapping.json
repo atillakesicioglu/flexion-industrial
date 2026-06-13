@@ -1,0 +1,112 @@
+{
+  "ABRASIVE FOOD": {
+    "db_id": 22,
+    "db_slug": "abrasive-food-hoses",
+    "match_type": "hoses_added"
+  },
+  "AIR-GAS": {
+    "db_id": 9,
+    "db_slug": "air-gas-hoses",
+    "match_type": "hoses_added"
+  },
+  "ALIZE 200°C": {
+    "db_id": 20,
+    "db_slug": "alize-200",
+    "match_type": "hoses_added"
+  },
+  "ALIZE SD 200°C": {
+    "db_id": 21,
+    "db_slug": "alize-sd-200",
+    "match_type": "hoses_added"
+  },
+  "CABLE PROTECTION": {
+    "db_id": 24,
+    "db_slug": "cable-protection-hoses",
+    "match_type": "hoses_added"
+  },
+  "CHEMICAL": {
+    "db_id": 16,
+    "db_slug": "chemical-hoses",
+    "match_type": "hoses_added"
+  },
+  "FIRE FIGHTING": {
+    "db_id": 18,
+    "db_slug": "fire-fighting-hoses",
+    "match_type": "hoses_added"
+  },
+  "FOOD": {
+    "db_id": 12,
+    "db_slug": "food-hoses",
+    "match_type": "hoses_added"
+  },
+  "HOT WATER": {
+    "db_id": 19,
+    "db_slug": "hot-water-hoses",
+    "match_type": "hoses_added"
+  },
+  "HYDRAULIC HOSES": {
+    "db_id": 17,
+    "db_slug": "hydraulic-hoses",
+    "match_type": "exact"
+  },
+  "MATERIAL HANDLING": {
+    "db_id": 13,
+    "db_slug": "material-handling-hoses",
+    "match_type": "hoses_added"
+  },
+  "OFFSHORE": {
+    "db_id": 27,
+    "db_slug": "offshore-hoses",
+    "match_type": "hoses_added"
+  },
+  "OIL & PETROLEUM": {
+    "db_id": 10,
+    "db_slug": "oil-petroleum-hoses",
+    "match_type": "hoses_added"
+  },
+  "PETROLEUM DISPENSING": {
+    "db_id": 23,
+    "db_slug": "petroleum-dispensing-hoses",
+    "match_type": "hoses_added"
+  },
+  "PVC HOSES": {
+    "db_id": 29,
+    "db_slug": "pvc-hoses",
+    "match_type": "exact"
+  },
+  "SEWER & ROAD CLEANING": {
+    "db_id": null,
+    "db_slug": null,
+    "match_type": "no_match"
+  },
+  "SILICONE": {
+    "db_id": 26,
+    "db_slug": "silicone-hoses",
+    "match_type": "hoses_added"
+  },
+  "STEAM": {
+    "db_id": 15,
+    "db_slug": "steam-hoses",
+    "match_type": "hoses_added"
+  },
+  "STEEL MILL": {
+    "db_id": 25,
+    "db_slug": "steel-mill-hoses",
+    "match_type": "hoses_added"
+  },
+  "THERMOPLASTIC HOSES": {
+    "db_id": 28,
+    "db_slug": "thermoplastic-hoses",
+    "match_type": "exact"
+  },
+  "WATER HOSES": {
+    "db_id": 8,
+    "db_slug": "water-hoses",
+    "match_type": "exact"
+  },
+  "WELDING": {
+    "db_id": 11,
+    "db_slug": "welding-hoses",
+    "match_type": "hoses_added"
+  }
+}

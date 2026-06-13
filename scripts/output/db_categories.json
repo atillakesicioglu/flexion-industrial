@@ -1,0 +1,134 @@
+[
+  {
+    "id": 8,
+    "name": "Water Hoses",
+    "slug": "water-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 9,
+    "name": "Air-Gas Hoses",
+    "slug": "air-gas-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 10,
+    "name": "Oil & Petroleum Hoses",
+    "slug": "oil-petroleum-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 11,
+    "name": "Welding Hoses",
+    "slug": "welding-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 12,
+    "name": "Food Hoses",
+    "slug": "food-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 13,
+    "name": "Material Handling Hoses",
+    "slug": "material-handling-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 14,
+    "name": "Sewer Cleaning Hoses",
+    "slug": "sewer-cleaning-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 15,
+    "name": "Steam Hoses",
+    "slug": "steam-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 16,
+    "name": "Chemical Hoses",
+    "slug": "chemical-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 17,
+    "name": "Hydraulic Hoses",
+    "slug": "hydraulic-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 18,
+    "name": "Fire Fighting Hoses",
+    "slug": "fire-fighting-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 19,
+    "name": "Hot Water Hoses",
+    "slug": "hot-water-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 20,
+    "name": "Alize 200°C Hoses",
+    "slug": "alize-200",
+    "parent_id": null
+  },
+  {
+    "id": 21,
+    "name": "Alize SD 200°C Hoses",
+    "slug": "alize-sd-200",
+    "parent_id": null
+  },
+  {
+    "id": 22,
+    "name": "Abrasive Food Hoses",
+    "slug": "abrasive-food-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 23,
+    "name": "Petroleum Dispensing Hoses",
+    "slug": "petroleum-dispensing-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 24,
+    "name": "Cable Protection Hoses",
+    "slug": "cable-protection-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 25,
+    "name": "Steel Mill Hoses",
+    "slug": "steel-mill-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 26,
+    "name": "Silicone Hoses",
+    "slug": "silicone-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 27,
+    "name": "Offshore Hoses",
+    "slug": "offshore-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 28,
+    "name": "Thermoplastic Hoses",
+    "slug": "thermoplastic-hoses",
+    "parent_id": null
+  },
+  {
+    "id": 29,
+    "name": "PVC Hoses",
+    "slug": "pvc-hoses",
+    "parent_id": null
+  }
+]
